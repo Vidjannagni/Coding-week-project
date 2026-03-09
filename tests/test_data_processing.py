@@ -71,13 +71,21 @@ class TestOptimizeMemory:
 
     def test_preserves_values(self, raw_df):
         df_opt = optimize_memory(raw_df)
-                                                                                                    
+
         for col in raw_df.select_dtypes(include=[np.number]).columns[:5]:
             np.testing.assert_allclose(
                 df_opt[col].values.astype(float),
                 raw_df[col].values.astype(float),
                 rtol=1e-3, atol=1e-5,
                 err_msg=f"Valeurs différentes dans {col}"
+            )
+
+    def test_dtype_after_optimize(self, raw_df):
+        df_opt = optimize_memory(raw_df)
+        for col in df_opt.select_dtypes(include=[np.number]).columns:
+            assert df_opt[col].dtype.itemsize <= raw_df[col].dtype.itemsize, (
+                f"{col} : dtype optimisé ({df_opt[col].dtype}) "
+                f"plus grand que l'original ({raw_df[col].dtype})"
             )
 
 
