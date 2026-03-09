@@ -40,7 +40,6 @@ class TestPipelineIntegrity:
         assert pipeline_features == model_features
 
     def test_pipeline_output_types(self, preprocessed):
-                                                             
         X_train, X_test, y_train, y_test, scaler, feature_names = preprocessed
         assert isinstance(X_train, np.ndarray)
         assert isinstance(X_test, np.ndarray)
@@ -48,6 +47,13 @@ class TestPipelineIntegrity:
         assert isinstance(y_test, np.ndarray)
         assert isinstance(feature_names, list)
         assert hasattr(scaler, "transform")
+
+    def test_feature_count_is_21(self, preprocessed):
+        """Le pipeline doit produire exactement 21 features après nettoyage."""
+        _, _, _, _, _, feature_names = preprocessed
+        assert len(feature_names) == 21, (
+            f"Nombre de features attendu : 21, obtenu : {len(feature_names)}"
+        )
 
 
 if __name__ == "__main__":
