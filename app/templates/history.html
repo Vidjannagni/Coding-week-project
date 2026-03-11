@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Diagnosis History &mdash; PediAppend{% endblock %}
+
+{% block content %}
+<section class="history-section">
+    <div class="history-container">
+        <div class="history-header animate-in">
+            <div>
+                <h1>&#128196; Diagnosis History</h1>
+                <p>Review past assessments and patient outcomes</p>
+            </div>
+            {% if records|length > 0 %}
+            <button class="btn btn-danger" onclick="clearHistory()">
+                &#128465; Clear All
+            </button>
+            {% endif %}
+        </div>
+
+        {% if records|length > 0 %}
+        <div class="filter-bar animate-in">
+            <div class="filter-search">
+                <span class="filter-icon">&#128269;</span>
+                <input type="text" id="searchInput" placeholder="Search records..." oninput="filterRecords()">
+            </div>
+            <div class="filter-group">
+                <select id="filterResult" onchange="filterRecords()">
+                    <option value="all">All Results</option>
+                    <option value="positive">Positive</option>
+                    <option value="negative">Negative</option>
+                </select>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if records|length == 0 %}
+        <div class="empty-state animate-in">
+            <div class="empty-icon">&#128203;</div>
+            <h3>No Records Yet</h3>
+            <p>Completed diagnoses will appear here for reference.</p>
+            <a href="{{ url_for('home') }}" class="btn btn-primary btn-lg">&#129657; Start First Diagnosis</a>
+        </div>
+        {% else %}
+        <div class="history-table-wrapper animate-in">
+            <table class="history-table" id="historyTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Patient</th>
+                        <th>Date &amp; Time</th>
+                        <th>Age</th>
+                        <th>Sex</th>
+                        <th>Result</th>
+                        <th>Confidence</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in records %}
+                    <tr data-result="{{ 'positive' if r.prediction == 1 else 'negative' }}">
+                        <td class="row-id">{{ loop.index }}</td>
+                        <td>
+                            {% if r.patient_first_name or r.patient_last_name %}
+                            <span style="font-weight:600;color:var(--slate-700)">{{ r.patient_first_name }} {{ r.patient_last_name }}</span>
+                            {% else %}
+                            <span style="color:var(--slate-400);font-style:italic">—</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ r.timestamp }}</td>
+                        <td>{{ r.age }}</td>
+                        <td><span class="sex-pill {{ 'male' if r.sex == 'male' else 'female' }}">{{ r.sex|capitalize }}</span></td>
+                        <td>
+                            {% if r.prediction == 1 %}
+                            <span class="result-pill positive">&#9888; Positive</span>
+                            {% else %}
+                            <span class="result-pill negative">&#10003; Negative</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="confidence-cell">
+                                <span>{{ (r.confidence * 100)|round(1) }}%</span>
+                                <div class="mini-bar"><div class="mini-bar-fill" style="width:{{ (r.confidence * 100)|round(1) }}%"></div></div>
+                            </div>
+                        </td>
+                        <td>
+                            <button class="btn-icon" onclick="deleteRecord({{ r.id }})" title="Delete">&#128465;</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

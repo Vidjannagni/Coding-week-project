@@ -1,0 +1,333 @@
+{% extends "base.html" %}
+{% block title %}PediAppend &mdash; Clinical Diagnosis{% endblock %}
+
+{% block content %}
+<section class="form-section" id="diagnosis">
+    <div class="form-outer">
+        <div class="section-title animate-in">
+            <h2>Clinical Diagnosis</h2>
+            <p>Enter patient data for AI-powered assessment</p>
+        </div>
+
+        <div class="step-progress animate-in" id="stepProgress">
+            <div class="step-indicators">
+                <div class="step-item">
+                    <div class="step-circle active" data-step="0">&#128100;</div>
+                    <div class="step-info"><p class="step-label-text" style="font-weight:600;color:var(--slate-800)">Demographics</p><p style="font-size:.75rem;color:var(--slate-400)">Patient info</p></div>
+                </div>
+                <div class="step-connector"><div class="step-connector-fill" style="width:0%"></div></div>
+                <div class="step-item">
+                    <div class="step-circle pending" data-step="1">&#128147;</div>
+                    <div class="step-info"><p class="step-label-text" style="font-weight:600;color:var(--slate-400)">Symptoms</p><p style="font-size:.75rem;color:var(--slate-400)">Clinical presentation</p></div>
+                </div>
+                <div class="step-connector"><div class="step-connector-fill" style="width:0%"></div></div>
+                <div class="step-item">
+                    <div class="step-circle pending" data-step="2">&#129657;</div>
+                    <div class="step-info"><p class="step-label-text" style="font-weight:600;color:var(--slate-400)">Clinical &amp; Lab</p><p style="font-size:.75rem;color:var(--slate-400)">Examination &amp; labs</p></div>
+                </div>
+            </div>
+            <div class="step-progress-bar"><div class="step-progress-fill" style="width:33%"></div></div>
+        </div>
+
+        <form action="{{ url_for('predict') }}" method="POST" id="diagnosisForm">
+            <div class="form-card">
+                <!-- ═══ Step 0: Demographics ═══ -->
+                <div class="form-step" data-step="0">
+                    <div class="form-card-body">
+                        <div class="form-section-header">
+                            <div class="form-section-icon violet">&#128100;</div>
+                            <div><h2>Patient Demographics</h2><p>Basic patient information for assessment</p></div>
+                        </div>
+                        <div class="form-grid-2">                            <div class="form-group">
+                                <label><span class="label-icon">&#128101;</span> Pr&eacute;nom</label>
+                                <input type="text" id="patient_first_name" name="patient_first_name" placeholder="ex. Marie" maxlength="60" required>
+                                <span class="field-error">Requis</span>
+                            </div>
+                            <div class="form-group">
+                                <label><span class="label-icon">&#128101;</span> Nom</label>
+                                <input type="text" id="patient_last_name" name="patient_last_name" placeholder="ex. Dupont" maxlength="60" required>
+                                <span class="field-error">Requis</span>
+                            </div>
+                        </div>
+                        <div class="form-grid-2">                            <div class="form-group">
+                                <label><span class="label-icon">&#128197;</span> Date de naissance</label>
+                                <input type="date" id="DateOfBirth" required>
+                                <span class="field-hint">Date de naissance du patient</span>
+                                <span class="field-error">Required</span>
+                            </div>
+                            <div class="form-group">
+                                <label><span class="label-icon">&#128197;</span> Date d'examen</label>
+                                <input type="date" id="ExamDate" required>
+                                <span class="field-hint">Date de la consultation</span>
+                                <span class="field-error">Required</span>
+                            </div>
+                        </div>
+                        <div class="bmi-card" id="ageCard">
+                            <div class="bmi-card-header">
+                                <div class="bmi-card-left">
+                                    <div class="bmi-card-icon">&#128118;</div>
+                                    <div><div class="bmi-card-label">&Acirc;ge calcul&eacute;</div><div class="bmi-card-sublabel">Bas&eacute; sur les dates</div></div>
+                                </div>
+                                <div><span class="bmi-value" id="ageDisplay">--</span><span class="bmi-unit">ans</span></div>
+                            </div>
+                            <div class="bmi-bar"><div class="bmi-bar-fill" id="ageFill" style="width:0%"></div></div>
+                            <input type="hidden" id="Age" name="Age" required>
+                            <div class="bmi-hint">&#9432; &Acirc;ge p&eacute;diatrique : 0-18 ans</div>
+                            <div class="bmi-hint" id="ageError" style="display:none;color:#f43f5e;font-weight:600;">&#9888; L&rsquo;&acirc;ge ne peut pas d&eacute;passer 18 ans (p&eacute;diatrique)</div>
+                        </div>
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label><span class="label-icon">&#128100;</span> Biological Sex</label>
+                                <div class="sex-toggle">
+                                    <button type="button" class="sex-btn" data-value="male" onclick="selectSex(this)">&#9794; Male</button>
+                                    <button type="button" class="sex-btn" data-value="female" onclick="selectSex(this)">&#9792; Female</button>
+                                </div>
+                                <input type="hidden" id="Sex" name="Sex" required>
+                                <span class="field-error">Required</span>
+                            </div>
+                            <div class="form-group">
+                                <label><span class="label-icon">&#128207;</span> Height <span class="unit">(cm)</span></label>
+                                <input type="number" id="Height" name="Height" step="0.1" min="30" max="200" placeholder="e.g. 140" required>
+                                <span class="field-error">Required</span>
+                            </div>
+                            <div class="form-group">
+                                <label><span class="label-icon">&#9878;</span> Weight <span class="unit">(kg)</span></label>
+                                <input type="number" id="Weight" name="Weight" step="0.1" min="3" max="150" placeholder="e.g. 36" required>
+                                <span class="field-error">Required</span>
+                            </div>
+                        </div>
+                        <div class="bmi-card" id="bmiCard">
+                            <div class="bmi-card-header">
+                                <div class="bmi-card-left">
+                                    <div class="bmi-card-icon">&#128200;</div>
+                                    <div><div class="bmi-card-label">Calculated BMI</div><div class="bmi-card-sublabel">Body Mass Index</div></div>
+                                </div>
+                                <div><span class="bmi-value" id="bmiDisplay">--</span><span class="bmi-unit">kg/m&sup2;</span></div>
+                            </div>
+                            <div class="bmi-bar"><div class="bmi-bar-fill" id="bmiFill" style="width:0%"></div></div>
+                            <input type="hidden" id="BMI" name="BMI">
+                            <div class="bmi-hint">&#9432; Normal pediatric BMI range: 14-24 kg/m&sup2;</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══ Step 1: Symptoms ═══ -->
+                <div class="form-step" data-step="1" style="display:none">
+                    <div class="form-card-body">
+                        <div class="form-section-header">
+                            <div class="form-section-icon cyan">&#128147;</div>
+                            <div><h2>Symptoms &amp; Presentation</h2><p>Clinical symptoms and associated findings</p></div>
+                        </div>
+
+                        <h4 style="font-weight:600;color:var(--slate-700);margin-bottom:1rem">Associated Symptoms</h4>
+                        <div class="symptom-grid">
+                            <label class="symptom-toggle" data-field="Nausea">
+                                <div class="toggle-left"><span class="toggle-emoji">&#129326;</span><span class="toggle-label">Nausea</span></div>
+                                <div class="switch" data-target="Nausea"></div>
+                                <input type="hidden" name="Nausea" value="no">
+                            </label>
+                            <label class="symptom-toggle" data-field="Loss_of_Appetite">
+                                <div class="toggle-left"><span class="toggle-emoji">&#127869;</span><span class="toggle-label">Appetite Loss</span></div>
+                                <div class="switch" data-target="Loss_of_Appetite"></div>
+                                <input type="hidden" name="Loss_of_Appetite" value="no">
+                            </label>
+                            <label class="symptom-toggle" data-field="Dysuria">
+                                <div class="toggle-left"><span class="toggle-emoji">&#9888;</span><span class="toggle-label">Dysuria</span></div>
+                                <div class="switch" data-target="Dysuria"></div>
+                                <input type="hidden" name="Dysuria" value="no">
+                            </label>
+                            <label class="symptom-toggle" data-field="Migratory_Pain">
+                                <div class="toggle-left"><span class="toggle-emoji">&#8599;</span><span class="toggle-label">Migratory Pain</span></div>
+                                <div class="switch" data-target="Migratory_Pain"></div>
+                                <input type="hidden" name="Migratory_Pain" value="no">
+                            </label>
+                            <label class="symptom-toggle" data-field="Lower_Right_Abd_Pain">
+                                <div class="toggle-left"><span class="toggle-emoji">&#128308;</span><span class="toggle-label">Lower Right Abd Pain</span></div>
+                                <div class="switch" data-target="Lower_Right_Abd_Pain"></div>
+                                <input type="hidden" name="Lower_Right_Abd_Pain" value="no">
+                            </label>
+                            <label class="symptom-toggle" data-field="Coughing_Pain">
+                                <div class="toggle-left"><span class="toggle-emoji">&#129319;</span><span class="toggle-label">Coughing Pain</span></div>
+                                <div class="switch" data-target="Coughing_Pain"></div>
+                                <input type="hidden" name="Coughing_Pain" value="no">
+                            </label>
+                        </div>
+
+                        <div class="form-grid-2" style="margin-top:2rem">
+                            <div class="form-group">
+                                <label>Stool</label>
+                                <select id="Stool" name="Stool" required>
+                                    <option value="" disabled selected>Select</option>
+                                    <option value="normal">Normal</option>
+                                    <option value="constipation">Constipation</option>
+                                    <option value="diarrhea">Diarrhea</option>
+                                </select>
+                                <span class="field-error">Required</span>
+                            </div>
+                            <div class="form-group">
+                                <label>Peritonitis</label>
+                                <select id="Peritonitis" name="Peritonitis" required>
+                                    <option value="" disabled selected>Select</option>
+                                    <option value="no">No</option>
+                                    <option value="local">Local</option>
+                                    <option value="generalized">Generalized</option>
+                                </select>
+                                <span class="field-error">Required</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══ Step 2: Clinical & Lab ═══ -->
+                <div class="form-step" data-step="2" style="display:none">
+                    <div class="form-card-body">
+                        <div class="form-section-header">
+                            <div class="form-section-icon emerald">&#129657;</div>
+                            <div><h2>Clinical Signs &amp; Laboratory</h2><p>Physical examination and lab results</p></div>
+                        </div>
+
+                        <h4 style="font-weight:600;color:var(--slate-700);margin-bottom:1rem">Physical Examination</h4>
+                        <div class="form-grid-3">
+                            <div class="form-group">
+                                <label><span class="label-icon">&#127777;</span> Body Temperature <span class="unit">(&deg;C)</span></label>
+                                <input type="number" id="Body_Temperature" name="Body_Temperature" step="0.1" min="35" max="42" placeholder="e.g. 37.5" required>
+                                <span class="field-error">Required</span>
+                            </div>
+                            <div class="form-group">
+                                <label>Contralateral Rebound</label>
+                                <select name="Contralateral_Rebound_Tenderness" required>
+                                    <option value="" disabled selected>Select</option>
+                                    <option value="yes">Yes</option>
+                                    <option value="no">No</option>
+                                </select>
+                                <span class="field-error">Required</span>
+                            </div>
+                            <div class="form-group">
+                                <label>Ipsilateral Rebound</label>
+                                <select name="Ipsilateral_Rebound_Tenderness" required>
+                                    <option value="" disabled selected>Select</option>
+                                    <option value="yes">Yes</option>
+                                    <option value="no">No</option>
+                                </select>
+                                <span class="field-error">Required</span>
+                            </div>
+                        </div>
+
+                        <div class="symptom-grid" style="margin-top:1.5rem;margin-bottom:2rem">
+                            <label class="symptom-toggle" data-field="Psoas_Sign">
+                                <div class="toggle-left"><span class="toggle-emoji">&#128170;</span><span class="toggle-label">Psoas Sign</span></div>
+                                <div class="switch" data-target="Psoas_Sign"></div>
+                                <input type="hidden" name="Psoas_Sign" value="no">
+                            </label>
+                            <label class="symptom-toggle" data-field="Neutrophilia">
+                                <div class="toggle-left"><span class="toggle-emoji">&#129656;</span><span class="toggle-label">Neutrophilia</span></div>
+                                <div class="switch" data-target="Neutrophilia"></div>
+                                <input type="hidden" name="Neutrophilia" value="no">
+                            </label>
+                        </div>
+
+                        <h4 style="font-weight:600;color:var(--slate-700);margin-bottom:1rem">Laboratory Results</h4>
+                        <div class="form-grid-3">
+                            <div class="form-group">
+                                <label><span class="label-icon">&#128300;</span> WBC Count <span class="unit">(10&sup3;/&micro;L)</span></label>
+                                <input type="number" id="WBC_Count" name="WBC_Count" step="0.01" min="0" placeholder="e.g. 12.5" required>
+                                <span class="field-hint">Reference: 4.5-13.5</span>
+                                <span class="field-error">Required</span>
+                            </div>
+                            <div class="form-group">
+                                <label>Neutrophil % <span class="unit">(%)</span></label>
+                                <input type="number" name="Neutrophil_Percentage" step="0.1" min="0" max="100" placeholder="e.g. 75" required>
+                                <span class="field-error">Required</span>
+                            </div>
+                            <div class="form-group">
+                                <label><span class="label-icon">&#128300;</span> CRP <span class="unit">(mg/L)</span></label>
+                                <input type="number" name="CRP" step="0.1" min="0" placeholder="e.g. 15.0" required>
+                                <span class="field-hint">Reference: &lt;10</span>
+                                <span class="field-error">Required</span>
+                            </div>
+                            <div class="form-group">
+                                <label>RBC Count <span class="unit">(10&#8310;/&micro;L)</span></label>
+                                <input type="number" name="RBC_Count" step="0.01" min="0" placeholder="e.g. 4.8" required>
+                                <span class="field-error">Required</span>
+                            </div>
+                            <div class="form-group">
+                                <label>Hemoglobin <span class="unit">(g/dL)</span></label>
+                                <input type="number" name="Hemoglobin" step="0.1" min="0" placeholder="e.g. 13.2" required>
+                                <span class="field-error">Required</span>
+                            </div>
+                            <div class="form-group">
+                                <label>RDW <span class="unit">(%)</span></label>
+                                <input type="number" name="RDW" step="0.1" min="0" placeholder="e.g. 13.5" required>
+                                <span class="field-error">Required</span>
+                            </div>
+                            <div class="form-group">
+                                <label>Thrombocytes <span class="unit">(10&sup3;/&micro;L)</span></label>
+                                <input type="number" name="Thrombocyte_Count" step="1" min="0" placeholder="e.g. 280" required>
+                                <span class="field-error">Required</span>
+                            </div>
+                        </div>
+
+                        <h4 style="font-weight:600;color:var(--slate-700);margin:2rem 0 1rem">Ultrasound</h4>
+                        <div class="form-grid-3">
+                            <div class="form-group">
+                                <label>Ultrasound Performed</label>
+                                <select id="US_Performed" name="US_Performed" required>
+                                    <option value="" disabled selected>Select</option>
+                                    <option value="yes">Yes</option>
+                                    <option value="no">No</option>
+                                </select>
+                                <span class="field-error">Required</span>
+                            </div>
+                        </div>
+                        <div class="us-conditional" id="usFields">
+                            <div class="form-grid-3">
+                                <div class="form-group">
+                                    <label>Appendix Visible on US</label>
+                                    <select name="Appendix_on_US"><option value="no" selected>No</option><option value="yes">Yes</option></select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Appendix Diameter <span class="unit">(mm)</span></label>
+                                    <input type="number" name="Appendix_Diameter" step="0.1" min="0" placeholder="e.g. 8.5">
+                                </div>
+                                <div class="form-group">
+                                    <label>Free Fluids</label>
+                                    <select name="Free_Fluids"><option value="no" selected>No</option><option value="yes">Yes</option></select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Pathological Lymph Nodes</label>
+                                    <select name="Pathological_Lymph_Nodes"><option value="no" selected>No</option><option value="yes">Yes</option></select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h4 style="font-weight:600;color:var(--slate-700);margin:2rem 0 1rem">Urine Analysis <span class="optional-badge">Optional</span></h4>
+                        <div class="form-grid-3">
+                            <div class="form-group">
+                                <label>Ketones in Urine</label>
+                                <select name="Ketones_in_Urine"><option value="no" selected>No</option><option value="+">+</option><option value="++">++</option><option value="+++">+++</option></select>
+                            </div>
+                            <div class="form-group">
+                                <label>RBC in Urine</label>
+                                <select name="RBC_in_Urine"><option value="no" selected>No</option><option value="+">+</option><option value="++">++</option><option value="+++">+++</option></select>
+                            </div>
+                            <div class="form-group">
+                                <label>WBC in Urine</label>
+                                <select name="WBC_in_Urine"><option value="no" selected>No</option><option value="+">+</option><option value="++">++</option><option value="+++">+++</option></select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-card-footer">
+                    <button type="button" class="btn btn-ghost" id="prevBtn" style="visibility:hidden">
+                        &larr; Previous
+                    </button>
+                    <button type="button" class="btn btn-primary btn-lg" id="nextBtn">
+                        Next &rarr;
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}
