@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Advanced clinical decision support system for pediatric appendicitis diagnosis. AI-powered predictions with SHAP explainability.">
+    <title>{% block title %}PediAppend — AI-Powered Pediatric Appendicitis Diagnosis{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Lucide Icons CDN (lightweight SVG icon library) -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+
+<!-- ======== NAVBAR ======== -->
+<header class="navbar" id="navbar">
+    <div class="navbar-inner">
+        <a href="{{ url_for('index') }}" class="navbar-logo">
+            <div class="navbar-logo-icon">
+                <i data-lucide="heart" style="width:24px;height:24px;fill:white;stroke:white"></i>
+                <span class="navbar-logo-dot"></span>
+            </div>
+            <div class="navbar-logo-text">
+                <span class="brand">PediAppend</span>
+                <span class="sub">AI Clinical Support</span>
+            </div>
+        </a>
+
+        <nav class="navbar-links">
+            <a href="{{ url_for('index') }}#features">Features</a>
+            <a href="{{ url_for('index') }}#diagnosis">Methodology</a>
+            <a href="{{ url_for('history') }}">History</a>
+            <a href="{{ url_for('index') }}#diagnosis" class="navbar-cta">
+                <i data-lucide="stethoscope" style="width:16px;height:16px"></i>
+                Start Diagnosis
+                <i data-lucide="arrow-right" style="width:16px;height:16px"></i>
+            </a>
+        </nav>
+    </div>
+</header>
+
+<!-- ======== FLASH MESSAGES ======== -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<div class="flash-messages" id="flashMessages">
+    {% for category, message in messages %}
+    <div class="flash-msg {{ category }}">{{ message }}</div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endwith %}
+
+<!-- ======== MAIN CONTENT ======== -->
+{% block content %}{% endblock %}
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<script>
+    // Initialize Lucide icons
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+</script>
+</body>
+</html>
