@@ -255,6 +255,12 @@ class TestPreprocessData:
         assert not np.isnan(X_train).any()
         assert not np.isnan(X_test).any()
 
+    def test_scaler_inverse_transform(self, preprocessed):
+        X_train, _, _, _, scaler, _ = preprocessed
+        X_back = scaler.inverse_transform(X_train)
+        assert X_back.shape == X_train.shape
+        assert not np.isnan(X_back).any()
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
