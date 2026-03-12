@@ -17,32 +17,36 @@
 {% block content %}
 <!-- ═══ NAVIGATION LATÉRALE — Points de navigation entre les 3 slides ═══ -->
 <!-- Chaque point (side-step) permet de naviguer vers la slide correspondante -->
-<nav class="side-steps" id="sideSteps">
-    <a class="side-step active" data-goto="0">
-        <span class="side-step-dot"></span>
+<nav class="side-steps" id="sideSteps" aria-label="Navigation entre les sections">
+    <a class="side-step active" data-goto="0" aria-current="true" aria-label="Section Accueil">
+        <span class="side-step-dot" aria-hidden="true"></span>
         <span class="side-step-label">Accueil</span>
     </a>
-    <a class="side-step" data-goto="1">
-        <span class="side-step-dot"></span>
+    <a class="side-step" data-goto="1" aria-label="Section Performances">
+        <span class="side-step-dot" aria-hidden="true"></span>
         <span class="side-step-label">Performances</span>
     </a>
-    <a class="side-step" data-goto="2">
-        <span class="side-step-dot"></span>
+    <a class="side-step" data-goto="2" aria-label="Section Fonctionnalités">
+        <span class="side-step-dot" aria-hidden="true"></span>
         <span class="side-step-label">Fonctionnalit&eacute;s</span>
     </a>
 </nav>
 
 <!-- ═══ CONTENEUR DES SLIDES — Viewport de défilement vertical ═══ -->
-<div class="slides-viewport" id="slidesViewport">
+<div class="slides-viewport" id="slidesViewport" aria-live="polite" aria-atomic="false">
 
 <!-- ═══ SLIDE 1 — HERO (Section principale d'accueil) ═══ -->
 <!-- Présentation de l'application avec titre, description, boutons CTA et badges de confiance -->
-<section class="hero landing-step active" id="step-hero">
+<section class="hero landing-step active" id="step-hero" aria-label="Section d'accueil">
     <!-- Compteur de slide (01/03) -->
-    <div class="step-counter"><span class="step-counter-num">01</span><span class="step-counter-sep">/</span><span class="step-counter-total">03</span></div>
+    <div class="step-counter" aria-hidden="true">
+        <span class="step-counter-num">01</span>
+        <span class="step-counter-sep">/</span>
+        <span class="step-counter-total">03</span>
+    </div>
 
     <!-- Éléments décoratifs d'arrière-plan (orbes animés et grille) -->
-    <div class="hero-bg">
+    <div class="hero-bg" aria-hidden="true">
         <div class="hero-orb hero-orb-1"></div>
         <div class="hero-orb hero-orb-2"></div>
         <div class="hero-orb hero-orb-3"></div>
@@ -97,8 +101,13 @@
         <!-- Colonne droite : illustration anatomique du système digestif -->
         <div class="hero-visual animate-in">
             <div class="hero-image-container anatomy-hero">
-                <img src="{{ url_for('static', filename='img/anatomy-body.jpg') }}" alt="Illustration anatomique du système digestif" class="hero-image" />
-                <div class="hero-image-overlay"></div>
+                <img src="{{ url_for('static', filename='img/anatomy-body.jpg') }}"
+                     alt="Illustration anatomique du système digestif"
+                     class="hero-image"
+                     loading="eager"
+                     width="380"
+                     height="460" />
+                <div class="hero-image-overlay" aria-hidden="true"></div>
             </div>
         </div>
     </div>
