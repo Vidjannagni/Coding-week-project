@@ -157,20 +157,13 @@ def build_feature_vector(form_data):
     vec = {}
 
     # ── Continuous / numeric ──
-    for col in ["Age", "BMI", "Height", "Weight", "Appendix_Diameter",
-                "Body_Temperature", "WBC_Count", "Neutrophil_Percentage",
-                "RBC_Count", "Hemoglobin", "RDW", "Thrombocyte_Count", "CRP"]:
+    for col in ["Age", "BMI", "Appendix_Diameter",
+                "Body_Temperature", "WBC_Count", "CRP"]:
         val = form_data.get(col, "0")
         vec[col] = float(val) if val else 0.0
 
-    # Features the form doesn't supply – default to 0
-    vec.setdefault("Length_of_Stay", 0)
-    vec.setdefault("Alvarado_Score", 0)
-    vec.setdefault("Paedriatic_Appendicitis_Score", 0)
-
     # ── Engineered features ──
     vec["WBC_CRP_Ratio"] = vec["WBC_Count"] / (vec["CRP"] + 0.1)
-    vec["Neutrophil_WBC_Interaction"] = vec["Neutrophil_Percentage"] * vec["WBC_Count"]
 
     # ── Binary _yes features ──
     binary_map = {
@@ -182,10 +175,8 @@ def build_feature_vector(form_data):
         "Nausea":   ("Nausea_yes", "yes"),
         "Loss_of_Appetite": ("Loss_of_Appetite_yes", "yes"),
         "Neutrophilia": ("Neutrophilia_yes", "yes"),
-        "Dysuria":  ("Dysuria_yes", "yes"),
         "Psoas_Sign": ("Psoas_Sign_yes", "yes"),
         "Ipsilateral_Rebound_Tenderness": ("Ipsilateral_Rebound_Tenderness_yes", "yes"),
-        "US_Performed": ("US_Performed_yes", "yes"),
         "Appendix_on_US": ("Appendix_on_US_yes", "yes"),
         "Free_Fluids": ("Free_Fluids_yes", "yes"),
     }
@@ -193,30 +184,6 @@ def build_feature_vector(form_data):
         vec[feat] = 1 if form_data.get(form_key, "").lower() == positive else 0
 
     # ── Multi-class one-hot ──
-    # Ketones_in_Urine: ++, +++, no  (drop_first removes +)
-    ketones = form_data.get("Ketones_in_Urine", "no")
-    vec["Ketones_in_Urine_++"] = 1 if ketones == "++" else 0
-    vec["Ketones_in_Urine_+++"] = 1 if ketones == "+++" else 0
-    vec["Ketones_in_Urine_no"] = 1 if ketones == "no" else 0
-
-    # RBC_in_Urine
-    rbc_u = form_data.get("RBC_in_Urine", "no")
-    vec["RBC_in_Urine_++"] = 1 if rbc_u == "++" else 0
-    vec["RBC_in_Urine_+++"] = 1 if rbc_u == "+++" else 0
-    vec["RBC_in_Urine_no"] = 1 if rbc_u == "no" else 0
-
-    # WBC_in_Urine
-    wbc_u = form_data.get("WBC_in_Urine", "no")
-    vec["WBC_in_Urine_++"] = 1 if wbc_u == "++" else 0
-    vec["WBC_in_Urine_+++"] = 1 if wbc_u == "+++" else 0
-    vec["WBC_in_Urine_no"] = 1 if wbc_u == "no" else 0
-
-    # Stool: constipation/diarrhea, diarrhea, normal  (drop_first removes constipation)
-    stool = form_data.get("Stool", "normal").lower()
-    vec["Stool_constipation, diarrhea"] = 1 if stool == "constipation" else 0
-    vec["Stool_diarrhea"] = 1 if stool == "diarrhea" else 0
-    vec["Stool_normal"] = 1 if stool == "normal" else 0
-
     # Peritonitis: local, no  (drop_first removes generalized)
     perit = form_data.get("Peritonitis", "no").lower()
     vec["Peritonitis_local"] = 1 if perit == "local" else 0
