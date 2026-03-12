@@ -138,13 +138,17 @@ document.addEventListener('DOMContentLoaded', () => {
             if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') { e.preventDefault(); goToSlide(currentSlide - 1); }
         });
 
-        // Mouse wheel navigation (throttled)
+        // Mouse wheel navigation (properly throttled)
         const viewport = document.getElementById('slidesViewport');
+        let wheelCooldown = false;
         if (viewport) {
             viewport.addEventListener('wheel', e => {
                 e.preventDefault();
+                if (wheelCooldown || slideAnimating) return;
+                wheelCooldown = true;
                 if (e.deltaY > 0) goToSlide(currentSlide + 1);
                 else goToSlide(currentSlide - 1);
+                setTimeout(() => { wheelCooldown = false; }, 800);
             }, { passive: false });
         }
 
@@ -211,7 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const required = step.querySelectorAll('[required]');
         let ok = true;
         required.forEach(el => {
-            const g = el.closest('.form-group') || el.parentElement;
+            const g = el.closest('.form-group') || el.closest('.bmi-card') || el.parentElement;
             if (!el.value) { g.classList.add('has-error'); ok = false; }
             else g.classList.remove('has-error');
         });
@@ -244,6 +248,43 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (steps.length) showStep(0);
 
+    /* ── Age calc from dates ── */
+    const dobEl = document.getElementById('DateOfBirth');
+    const examEl = document.getElementById('ExamDate');
+    const ageEl = document.getElementById('Age');
+    const ageDisp = document.getElementById('ageDisplay');
+    const ageFill = document.getElementById('ageFill');
+    const ageCard = document.getElementById('ageCard');
+
+    function calcAge() {
+        if (!dobEl?.value || !examEl?.value) return;
+        const dob = new Date(dobEl.value);
+        const exam = new Date(examEl.value);
+        if (exam <= dob) return;
+        const diffMs = exam - dob;
+        const age = diffMs / (365.25 * 24 * 60 * 60 * 1000);
+        const val = age.toFixed(1);
+        if (ageDisp) ageDisp.textContent = val;
+        if (ageCard) ageCard.classList.add('active');
+        const ageErrorEl = document.getElementById('ageError');
+        if (age > 18) {
+            if (ageDisp) ageDisp.style.color = 'var(--rose-500, #f43f5e)';
+            if (ageErrorEl) ageErrorEl.style.display = 'block';
+            if (ageEl) ageEl.value = '';
+        } else {
+            if (ageDisp) ageDisp.style.color = '';
+            if (ageErrorEl) ageErrorEl.style.display = 'none';
+            if (ageEl) ageEl.value = val;
+            const g = ageEl?.closest('.form-group') || ageCard;
+            if (g) g.classList.remove('has-error');
+        }
+    }
+    if (dobEl) dobEl.addEventListener('input', calcAge);
+    if (examEl) {
+        examEl.addEventListener('input', calcAge);
+        examEl.value = new Date().toISOString().split('T')[0];
+    }
+
     /* ── BMI calc ── */
     const hEl = document.getElementById('Height');
     const wEl = document.getElementById('Weight');
@@ -269,8 +310,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /* ── Sex toggle ── */
     window.selectSex = function(btn) {
-        document.querySelectorAll('.sex-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+        document.querySelectorAll('.sex-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
         const sexInput = document.getElementById('Sex');
         if (sexInput) sexInput.value = btn.dataset.value;
         const g = sexInput?.closest('.form-group') || sexInput?.parentElement;
@@ -329,7 +370,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /* SHAP bar animation */
-    document.querySelectorAll('.shap-bar').forEach(bar => {
+    document.querySelectorAll('.shap-fill').forEach(bar => {
         const w = bar.dataset.width;
         if (w) {
             setTimeout(() => { bar.style.width = w + '%'; }, 500);
@@ -338,13 +379,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /* ═══ HISTORY PAGE ═══ */
     window.deleteRecord = function(id) {
-        if (!confirm('Delete this record?')) return;
+        if (!confirm('Supprimer cet enregistrement ?')) return;
         fetch('/history/' + encodeURIComponent(id), { method: 'DELETE' })
             .then(r => { if (r.ok) location.reload(); });
     };
 
     window.clearHistory = function() {
-        if (!confirm('Clear all history records?')) return;
+        if (!confirm('Effacer tout l\'historique ? Cette action est irréversible.')) return;
         fetch('/history/clear', { method: 'POST' })
             .then(r => { if (r.ok) location.reload(); });
     };
@@ -362,7 +403,8 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     /* Auto-dismiss flash */
-    document.querySelectorAll('.flash-message').forEach(m => {
-        setTimeout(() => { m.style.opacity = '0'; m.style.transform = 'translateY(-10px)'; setTimeout(() => m.remove(), 400); }, 4000);
+    document.querySelectorAll('.flash-msg').forEach(m => {
+        m.style.transition = 'opacity 0.4s, transform 0.4s';
+        setTimeout(() => { m.style.opacity = '0'; m.style.transform = 'translateY(-10px)'; setTimeout(() => m.remove(), 400); }, 3000);
     });
 });
