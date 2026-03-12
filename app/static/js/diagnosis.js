@@ -9,6 +9,12 @@
 /** Âge maximum (années) accepté par le formulaire pédiatrique. */
 const AGE_MAX = 18;
 
+/** IMC de référence maximale pour le calcul de la barre de progression d'IMC. */
+const BMI_MAX = 40;
+
+/** Décalage (px) au-dessus de la section formulaire lors du défilement automatique. */
+const FORM_SCROLL_OFFSET = 100;
+
 document.addEventListener('DOMContentLoaded', () => {
     const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -92,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 currentStep++;
                 showStep(currentStep);
-                window.scrollTo({ top: document.querySelector('.form-section').offsetTop - 100, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
+                window.scrollTo({ top: document.querySelector('.form-section').offsetTop - FORM_SCROLL_OFFSET, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
             }
         });
     }
@@ -159,7 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const val = bmi.toFixed(1);
             if (bmiEl) bmiEl.value = val;
             if (bmiDisp) bmiDisp.textContent = val;
-            if (bmiFill) bmiFill.style.width = Math.min(bmi / 40 * 100, 100) + '%';
+            if (bmiFill) bmiFill.style.width = Math.min(bmi / BMI_MAX * 100, 100) + '%';
             if (bmiCard) bmiCard.classList.add('active');
         }
     }
