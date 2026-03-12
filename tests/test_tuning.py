@@ -190,6 +190,12 @@ class TestTuneAllModels:
             assert 0 <= m["precision"] <= 1
             assert 0 <= m["roc_auc"] <= 1
 
+    def test_top3_is_list(self, mini_tune):
+        for name, data in mini_tune.items():
+            assert isinstance(data["top3"], list), (
+                f"top3 de {name} devrait être une liste"
+            )
+
 
                                                              
                                 
