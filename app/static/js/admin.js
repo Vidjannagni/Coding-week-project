@@ -4,6 +4,18 @@
    Gère : bascule du rôle administrateur et suppression
    d'un utilisateur via les endpoints API.
    ═══════════════════════════════════════════════════════════ */
+
+/**
+ * Affiche le message d'erreur contenu dans la réponse JSON,
+ * ou un message générique si la réponse n'est pas parsable.
+ * @param {Response} res - La réponse fetch en erreur.
+ */
+async function handleApiError(res) {
+    let data = {};
+    try { data = await res.json(); } catch { /* corps non-JSON ignoré */ }
+    alert(data.error || 'Erreur');
+}
+
 document.addEventListener('DOMContentLoaded', () => {
 
     const table = document.querySelector('.admin-table');
@@ -21,11 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!confirm('Modifier le rôle de cet utilisateur ?')) return;
             const res = await fetch(`/admin/toggle/${encodeURIComponent(userId)}`, { method: 'POST' });
             if (res.ok) location.reload();
-            else {
-                let data = {};
-                try { data = await res.json(); } catch {}
-                alert(data.error || 'Erreur');
-            }
+            else await handleApiError(res);
         }
 
         if (action === 'delete-user') {
@@ -35,9 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (res.ok) {
                 document.getElementById(`user-row-${userId}`)?.remove();
             } else {
-                let data = {};
-                try { data = await res.json(); } catch {}
-                alert(data.error || 'Erreur');
+                await handleApiError(res);
             }
         }
     });
