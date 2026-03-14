@@ -1,0 +1,174 @@
+name: CI — Pediatric Appendicitis App
+
+on:
+  push:
+    branches: [main]
+    tags:
+      - "v*"          # déclenché sur v1.0.0, v1.2.3, etc.
+  pull_request:
+    branches: [main]
+
+jobs:
+  imports:
+    name: "Dépendances & imports"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.13"
+
+      - name: Cache pip
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+
+      - name: Installer les dépendances
+        run: pip install -r requirements.txt
+
+      - name: Lire la version
+        id: version
+        run: |
+          echo "value=$(python -c 'import src; print(src.__version__)')" >> $GITHUB_OUTPUT
+
+      - name: Afficher la version
+        run: echo "▶ Version en cours de test ${{ steps.version.outputs.value }}"
+
+      - name: Importer les modules Python
+        run: |
+          python -c "from src.data_processing import load_data, optimize_memory, clean_data, preprocess_data; from src.train_model import get_models, train_and_evaluate, select_best_model; import src.evaluate_model"
+
+      - name: Import app Flask
+        run: python -c "import app"
+        working-directory: app
+
+  tests:
+    name: "Tests unitaires"
+    runs-on: ubuntu-latest
+    needs: imports
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.13"
+
+      - name: Cache pip
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+
+      - name: Installer les dépendances
+        run: pip install -r requirements.txt
+
+      - name: Lancer pytest
+        run: pytest tests/ -v --tb=short
+
+  data-pipeline:
+    name: "Pipeline données"
+    runs-on: ubuntu-latest
+    needs: imports
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.13"
+
+      - name: Cache pip
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+
+      - name: Installer les dépendances
+        run: pip install -r requirements.txt
+
+      - name: Vérifier le pipeline de données
+        run: pytest tests/test_data_processing.py tests/test_run.py -v --tb=short
+
+  flask-routes:
+    name: "Routes Flask"
+    runs-on: ubuntu-latest
+    needs: imports
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.13"
+
+      - name: Cache pip
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+
+      - name: Installer les dépendances
+        run: pip install -r requirements.txt
+
+      - name: Vérifier les routes Flask
+        run: pytest tests/test_app.py::TestFlaskApp -v --tb=short
+
+  check-models:
+    name: "Artefacts ML"
+    runs-on: ubuntu-latest
+    needs: imports
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.13"
+
+      - name: Cache pip
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+
+      - name: Installer les dépendances
+        run: pip install -r requirements.txt
+
+      - name: Vérifier les artefacts ML
+        run: pytest tests/test_train_model.py::TestSavedModel -v --tb=short
+
+  release:
+    name: "Créer la Release GitHub"
+    runs-on: ubuntu-latest
+    needs: [tests, data-pipeline, flask-routes, check-models]
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Lire la version
+        id: version
+        run: |
+          echo "value=$(python -c 'import src; print(src.__version__)')" >> $GITHUB_OUTPUT
+
+      - name: Créer la Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: "v${{ steps.version.outputs.value }}"
+          body: |
+            ## Pediatric Appendicitis App — v${{ steps.version.outputs.value }}
+
+            ✅ Tous les tests CI passés avant cette release :
+            - Imports Python
+            - Tests unitaires pytest
+            - Pipeline données (UCI → clean → preprocess)
+            - Routes Flask
+            - Artefacts ML (Recall ≥ 0.85)
+          files: |
+            models/metrics.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,23 +1,42 @@
+<!--
+    login.html — Page de connexion
+    ================================
+    Formulaire d'authentification permettant aux utilisateurs existants de se connecter.
+    Hérite de base.html.
+
+    Structure :
+    - Fond décoratif avec orbes animés
+    - Carte d'authentification contenant :
+      - En-tête avec icône et titre "Connexion"
+      - Formulaire POST vers auth.login avec champs : nom d'utilisateur, mot de passe
+      - Option "Se souvenir de moi" (checkbox)
+      - Bouton de soumission
+      - Lien vers la page d'inscription pour les nouveaux utilisateurs
+-->
 {% extends "base.html" %}
 {% block title %}Connexion &mdash; PediAppend{% endblock %}
 
 {% block content %}
 <section class="auth-section">
     <div class="auth-container animate-in visible">
-        <!-- Decorative background -->
+        <!-- Fond décoratif — orbes animés pour l'esthétique -->
         <div class="auth-bg">
             <div class="hero-orb hero-orb-1"></div>
             <div class="hero-orb hero-orb-2"></div>
         </div>
 
+        <!-- Carte principale de connexion -->
         <div class="auth-card">
+            <!-- En-tête : icône cadenas et titre -->
             <div class="auth-header">
                 <div class="auth-icon">🔐</div>
                 <h1>Connexion</h1>
                 <p>Accédez à votre espace diagnostic</p>
             </div>
 
-            <form method="POST" action="{{ url_for('login') }}" class="auth-form">
+            <!-- Formulaire de connexion — envoie les données en POST à la route auth.login -->
+            <form method="POST" action="{{ url_for('auth.login') }}" class="auth-form">
+                <!-- Champ : Nom d'utilisateur (minimum 3 caractères) -->
                 <div class="auth-field">
                     <label for="username">Nom d'utilisateur</label>
                     <div class="auth-input-wrap">
@@ -27,6 +46,7 @@
                     </div>
                 </div>
 
+                <!-- Champ : Mot de passe (minimum 6 caractères) -->
                 <div class="auth-field">
                     <label for="password">Mot de passe</label>
                     <div class="auth-input-wrap">
@@ -36,6 +56,7 @@
                     </div>
                 </div>
 
+                <!-- Option : Se souvenir de moi (session persistante) -->
                 <div class="auth-options">
                     <label class="auth-checkbox">
                         <input type="checkbox" name="remember" value="1">
@@ -43,14 +64,16 @@
                     </label>
                 </div>
 
+                <!-- Bouton de soumission du formulaire -->
                 <button type="submit" class="btn btn-primary btn-lg auth-submit">
                     Se connecter →
                 </button>
             </form>
 
+            <!-- Lien de redirection vers la page d'inscription -->
             <div class="auth-footer">
                 <p>Pas encore de compte ?
-                    <a href="{{ url_for('register') }}">Créer un compte</a>
+                    <a href="{{ url_for('auth.register') }}">Créer un compte</a>
                 </p>
             </div>
         </div>

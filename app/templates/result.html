@@ -1,3 +1,24 @@
+<!--
+    result.html — Page de résultat du diagnostic
+    ===============================================
+    Affiche le résultat de l'analyse par le modèle Random Forest après soumission du formulaire.
+    Hérite de base.html.
+
+    Variables Jinja2 attendues (passées par la route Flask) :
+    - probability   : probabilité d'appendicite (float entre 0 et 1)
+    - prediction    : prédiction binaire (1 = appendicite probable, 0 = peu probable)
+    - confidence    : confiance du modèle (float entre 0 et 1)
+    - patient_name  : nom du patient (chaîne de caractères, optionnel)
+    - shap_values   : liste de dictionnaires {feature, value, shap} triée par importance
+
+    Structure de la page :
+    1. Carte de résultat principal — anneau SVG avec score + badges de risque + recommandation
+    2. Cartes d'information — 4 cartes résumant les métriques clés
+    3. Carte anatomique — illustration et description de la zone concernée
+    4. Analyse SHAP — diagramme en cascade + grille des contributions positives/négatives
+    5. Boutons d'action — nouveau diagnostic et historique
+    6. Avertissement clinique — rappel que l'outil est une aide à la décision
+-->
 {% extends "base.html" %}
 {% block title %}Résultat du Diagnostic &mdash; PediAppend{% endblock %}
 
@@ -5,45 +26,59 @@
 <section class="result-section">
     <div class="result-container">
 
-        <!-- ═══ Main Result Card ═══ -->
+        <!-- ═══ Carte de résultat principal ═══ -->
+        <!-- Affiche le score de probabilité sous forme d'un anneau SVG animé -->
+        <!-- Couleur conditionnelle : rouge (>=70%), orange (>=40%), bleu/vert (<40%) -->
         <div class="result-main-card animate-in">
+            <!-- Éléments décoratifs d'arrière-plan -->
             <div class="bg-decor">
                 <div class="bg-orb bg-orb-1" style="background:linear-gradient(135deg,#4a7c9b,#5b8fa8)"></div>
                 <div class="bg-orb bg-orb-2" style="background:linear-gradient(135deg,#6a9fb5,#4a7c9b)"></div>
                 <div class="grid-overlay"></div>
             </div>
             <div class="result-main-inner">
-                <!-- SVG Ring -->
+                <!-- Anneau SVG — Jauge circulaire du score de probabilité -->
+                <!-- Le dégradé de couleur change selon le niveau de risque -->
                 <div class="ring-container">
                     <svg viewBox="0 0 200 200" class="ring-svg">
                         <defs>
+                            <!-- Dégradé conditionnel selon le seuil de probabilité -->
                             <linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                                 {% if probability >= 0.7 %}
+                                <!-- Rouge : risque élevé (>=70%) -->
                                 <stop offset="0%" stop-color="#c0392b"/>
                                 <stop offset="100%" stop-color="#a93226"/>
                                 {% elif probability >= 0.4 %}
+                                <!-- Orange/Ambre : risque modéré (>=40%) -->
                                 <stop offset="0%" stop-color="#d4a03c"/>
                                 <stop offset="100%" stop-color="#c4922e"/>
                                 {% else %}
+                                <!-- Bleu/Vert : risque faible (<40%) -->
                                 <stop offset="0%" stop-color="#2e86ab"/>
                                 <stop offset="100%" stop-color="#27ae60"/>
                                 {% endif %}
                             </linearGradient>
                         </defs>
+                        <!-- Cercle de fond (track) -->
                         <circle cx="100" cy="100" r="90" class="ring-bg"/>
+                        <!-- Cercle de progression (rempli selon la probabilité) -->
                         <circle cx="100" cy="100" r="90" class="ring-progress"
                                 stroke="url(#ringGradient)"
                                 data-pct="{{ (probability * 100)|round(1) }}"/>
                     </svg>
+                    <!-- Texte central de l'anneau : pourcentage et label -->
                     <div class="ring-center">
                         <span class="ring-pct" data-value="{{ (probability * 100)|round(1) }}">0</span><span class="ring-pct-sign">%</span>
                         <span class="ring-label">Score de risque</span>
                     </div>
+                    <!-- Effet de lueur derrière l'anneau (couleur adaptée au risque) -->
                     <div class="ring-glow" style="background:{% if probability >= 0.7 %}#c0392b{% elif probability >= 0.4 %}#d4a03c{% else %}#2e86ab{% endif %}"></div>
                 </div>
 
-                <!-- Details -->
+                <!-- Détails du résultat : badges de risque, prédiction, nom du patient, description -->
                 <div class="result-details">
+                    <!-- Badges de niveau de risque et recommandation d'urgence -->
+                    <!-- 3 niveaux : élevé (>=70%), modéré (>=40%), faible (<40%) -->
                     <div class="result-badges">
                         {% if probability >= 0.7 %}
                         <div class="risk-badge high">&#9888; Risque élevé</div>
@@ -57,15 +92,19 @@
                         {% endif %}
                     </div>
 
+                    <!-- Titre de la prédiction (probable / peu probable) -->
                     <h2>{{ "Appendicite probable" if prediction == 1 else "Appendicite peu probable" }}</h2>
+                    <!-- Nom du patient (affiché si disponible) -->
                     {% if patient_name %}
                     <p class="result-patient-name">&#128101; {{ patient_name }}</p>
                     {% endif %}
+                    <!-- Description textuelle du résultat avec probabilité et confiance -->
                     <p class="result-desc">
                         Le modèle prédit une probabilité de <strong>{{ (probability * 100)|round(1) }}%</strong>
                         d'appendicite avec une confiance de <strong>{{ (confidence * 100)|round(1) }}%</strong>.
                     </p>
 
+                    <!-- Indicateur de confiance en ligne -->
                     <div class="confidence-inline">
                         <span class="ci-icon">&#127919;</span>
                         <span class="ci-label">Confiance</span>
@@ -75,8 +114,9 @@
             </div>
         </div>
 
-        <!-- ═══ Info Cards ═══ -->
+        <!-- ═══ Cartes d'information — 4 métriques résumées ═══ -->
         <div class="info-cards animate-in">
+            <!-- Carte 1 : Score de probabilité (évaluation du risque) -->
             <div class="info-card">
                 <div class="info-card-inner">
                     <div class="info-card-icon cyan">&#128202;</div>
@@ -87,6 +127,7 @@
                     </div>
                 </div>
             </div>
+            <!-- Carte 2 : Confiance du modèle -->
             <div class="info-card">
                 <div class="info-card-inner">
                     <div class="info-card-icon emerald">&#127919;</div>
@@ -97,6 +138,7 @@
                     </div>
                 </div>
             </div>
+            <!-- Carte 3 : Nombre de variables analysées par SHAP -->
             <div class="info-card">
                 <div class="info-card-inner">
                     <div class="info-card-icon violet">&#129504;</div>
@@ -107,6 +149,7 @@
                     </div>
                 </div>
             </div>
+            <!-- Carte 4 : Temps d'analyse -->
             <div class="info-card">
                 <div class="info-card-inner">
                     <div class="info-card-icon amber">&#9201;</div>
@@ -119,7 +162,8 @@
             </div>
         </div>
 
-        <!-- ═══ Anatomical Reference ═══ -->
+        <!-- ═══ Carte de référence anatomique ═══ -->
+        <!-- Illustration et description de la localisation de l'appendice vermiforme -->
         <div class="anatomy-card animate-in">
             <div class="anatomy-card-inner">
                 <div class="anatomy-text">
@@ -128,6 +172,7 @@
                     </div>
                     <h3>Zone concernée : Appendice vermiforme</h3>
                     <p>L'appendice est un petit organe tubulaire situé à la jonction de l'intestin grêle et du gros intestin, dans la <strong>fosse iliaque droite</strong>. L'inflammation de cet organe (appendicite) constitue l'urgence chirurgicale abdominale la plus fréquente en pédiatrie.</p>
+                    <!-- Faits anatomiques clés : position, taille normale et seuil pathologique -->
                     <div class="anatomy-facts">
                         <div class="anatomy-fact">
                             <span class="af-icon">&#128205;</span>
@@ -152,15 +197,20 @@
                         </div>
                     </div>
                 </div>
+                <!-- Image d'illustration anatomique de l'appendice -->
                 <div class="anatomy-illustration">
                     <img src="{{ url_for('static', filename='img/appendix-anatomy.svg') }}" alt="Illustration anatomique de l'appendice" />
                 </div>
             </div>
         </div>
 
-        <!-- ═══ SHAP Card ═══ -->
+        <!-- ═══ Carte d'analyse SHAP — Explicabilité du modèle ═══ -->
+        <!-- SHAP (SHapley Additive exPlanations) montre la contribution de chaque variable -->
+        <!-- à la prédiction finale. Valeurs positives = augmentent la probabilité d'appendicite, -->
+        <!-- valeurs négatives = diminuent la probabilité d'appendicite -->
         <div class="shap-card animate-in">
             <div class="shap-card-inner">
+                <!-- En-tête avec titre et légende (positif/négatif) -->
                 <div class="shap-header">
                     <div class="shap-header-left">
                         <div class="shap-header-icon">&#129504;</div>
@@ -169,29 +219,35 @@
                             <span class="shap-sub">Facteurs clés derrière cette prédiction</span>
                         </div>
                     </div>
+                    <!-- Légende des couleurs : vert = positif, rouge = négatif -->
                     <div class="shap-legend">
                         <span class="legend-item"><span class="legend-dot positive"></span> Positif</span>
                         <span class="legend-item"><span class="legend-dot negative"></span> Négatif</span>
                     </div>
                 </div>
 
-                <!-- Waterfall bars -->
+                <!-- Diagramme en cascade (waterfall) — barres horizontales pour chaque variable -->
+                <!-- La largeur de chaque barre est proportionnelle à la valeur SHAP absolue -->
                 <div class="shap-rows">
                     {% set max_shap = shap_values[0].shap|abs if shap_values else 1 %}
                     {% for sv in shap_values %}
                     <div class="shap-row">
+                        <!-- Nom de la variable clinique -->
                         <div class="shap-feature">{{ sv.feature }}</div>
+                        <!-- Barre de contribution (positive = verte, négative = rouge) -->
                         <div class="shap-track">
                             <div class="shap-fill {{ 'positive' if sv.shap >= 0 else 'negative' }}"
                                  data-width="{{ ((sv.shap|abs / max_shap) * 100)|round|int }}"></div>
                         </div>
+                        <!-- Valeur numérique SHAP avec signe (+/-) -->
                         <div class="shap-val {{ 'positive' if sv.shap >= 0 else 'negative' }}">{{ '%+.4f'|format(sv.shap) }}</div>
                     </div>
                     {% endfor %}
                 </div>
 
-                <!-- Feature columns -->
+                <!-- Grille détaillée des contributions — divisée en 2 colonnes -->
                 <div class="shap-features-grid">
+                    <!-- Colonne gauche : Contributions positives (augmentent la probabilité) -->
                     <div class="shap-feature-col positive-col">
                         <div class="shap-col-header">
                             <div class="shap-col-icon pos">&#128314;</div>
@@ -200,6 +256,7 @@
                                 <div class="shap-col-sub pos">Augmente la probabilité d'appendicite</div>
                             </div>
                         </div>
+                        <!-- Liste des variables avec contribution SHAP positive -->
                         {% for sv in shap_values if sv.shap >= 0 %}
                         <div class="shap-feature-item pos-item">
                             <div class="shap-feature-item-inner">
@@ -215,6 +272,7 @@
                         </div>
                         {% endfor %}
                     </div>
+                    <!-- Colonne droite : Contributions négatives (diminuent la probabilité) -->
                     <div class="shap-feature-col negative-col">
                         <div class="shap-col-header">
                             <div class="shap-col-icon neg">&#128315;</div>
@@ -223,6 +281,7 @@
                                 <div class="shap-col-sub neg">Diminue la probabilité d'appendicite</div>
                             </div>
                         </div>
+                        <!-- Liste des variables avec contribution SHAP négative -->
                         {% for sv in shap_values if sv.shap < 0 %}
                         <div class="shap-feature-item neg-item">
                             <div class="shap-feature-item-inner">
@@ -242,17 +301,20 @@
             </div>
         </div>
 
-        <!-- ═══ Actions ═══ -->
+        <!-- ═══ Boutons d'action ═══ -->
         <div class="result-actions animate-in">
+            <!-- Lancer un nouveau diagnostic -->
             <a href="{{ url_for('diagnosis') }}" class="btn btn-primary btn-lg">
                 &#129657; Nouveau diagnostic
             </a>
-            <a href="{{ url_for('history') }}" class="btn btn-ghost btn-lg">
+            <!-- Consulter l'historique des diagnostics passés -->
+            <a href="{{ url_for('auth.history') }}" class="btn btn-ghost btn-lg">
                 &#128196; Voir l'historique
             </a>
         </div>
 
-        <!-- ═══ Disclaimer ═══ -->
+        <!-- ═══ Avertissement clinique ═══ -->
+        <!-- Rappel important : cet outil est une aide à la décision, pas un diagnostic définitif -->
         <div class="clinical-note animate-in">
             <span class="note-icon">&#9888;</span>
             <p><strong>Avertissement clinique :</strong> Cet outil fournit des prédictions assistées par IA à des fins d'aide à la décision clinique uniquement. Les résultats doivent être interprétés par des professionnels de santé qualifiés en conjonction avec les données cliniques, l'historique du patient et les protocoles diagnostiques établis.</p>

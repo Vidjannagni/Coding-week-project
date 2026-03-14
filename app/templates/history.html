@@ -1,3 +1,19 @@
+<!--
+    history.html — Page d'historique des diagnostics
+    ===================================================
+    Affiche la liste des diagnostics passés de l'utilisateur connecté sous forme de tableau.
+    Hérite de base.html.
+
+    Variables Jinja2 attendues :
+    - records : liste des enregistrements de diagnostics (objets avec id, patient_first_name,
+                patient_last_name, timestamp, age, sex, prediction, confidence)
+
+    Structure :
+    1. En-tête — titre, compteur de diagnostics, bouton "Tout effacer"
+    2. Barre de filtres — recherche textuelle et filtre par résultat (positif/négatif)
+    3. État vide — affiché si aucun diagnostic n'a été enregistré
+    4. Tableau de données — liste des diagnostics avec actions (supprimer)
+-->
 {% extends "base.html" %}
 {% block title %}Historique &mdash; PediAppend{% endblock %}
 
@@ -5,15 +21,19 @@
 <section class="history-section">
     <div class="history-container">
 
-        <!-- Header -->
+        <!-- ═══ En-tête de la page ═══ -->
+        <!-- Titre, sous-titre, compteur de diagnostics et bouton de suppression globale -->
         <div class="history-header animate-in">
             <div>
                 <h1><span class="history-icon">&#128203;</span> Historique des diagnostics</h1>
                 <p class="history-subtitle">Consultez vos &eacute;valuations pass&eacute;es et les r&eacute;sultats patients</p>
             </div>
+            <!-- Actions de l'en-tête — affichées uniquement s'il y a des enregistrements -->
             {% if records|length > 0 %}
             <div class="history-header-actions">
+                <!-- Compteur du nombre total de diagnostics -->
                 <span class="record-count">{{ records|length }} diagnostic{{ 's' if records|length > 1 else '' }}</span>
+                <!-- Bouton pour effacer tout l'historique (appelle clearHistory() en JS) -->
                 <button class="btn-clear" onclick="clearHistory()">
                     &#128465; Tout effacer
                 </button>
@@ -21,13 +41,16 @@
             {% endif %}
         </div>
 
-        <!-- Filter bar -->
+        <!-- ═══ Barre de filtres — Recherche et filtrage des résultats ═══ -->
+        <!-- Visible uniquement s'il y a des enregistrements -->
         {% if records|length > 0 %}
         <div class="filter-bar animate-in">
+            <!-- Champ de recherche textuelle (filtre en temps réel via JS) -->
             <div class="filter-bar-left">
                 <span class="filter-icon">&#128269;</span>
                 <input type="text" id="searchInput" class="filter-input" placeholder="Rechercher un patient, une date&hellip;" oninput="filterRecords()">
             </div>
+            <!-- Menu déroulant pour filtrer par type de résultat (tous / positif / négatif) -->
             <div class="filter-bar-right">
                 <select id="filterResult" class="filter-select" onchange="filterRecords()">
                     <option value="all">Tous les r&eacute;sultats</option>
@@ -38,19 +61,21 @@
         </div>
         {% endif %}
 
-        <!-- Empty state -->
+        <!-- ═══ État vide — Affiché lorsqu'il n'y a aucun diagnostic enregistré ═══ -->
         {% if records|length == 0 %}
         <div class="empty-state animate-in">
             <div class="empty-icon">&#128203;</div>
             <h3>Aucun diagnostic enregistr&eacute;</h3>
             <p>Les diagnostics effectu&eacute;s appara&icirc;tront ici pour r&eacute;f&eacute;rence.</p>
+            <!-- Bouton CTA pour lancer un premier diagnostic -->
             <a href="{{ url_for('diagnosis') }}" class="btn btn-primary btn-lg">&#129657; Lancer un diagnostic</a>
         </div>
 
-        <!-- Table -->
+        <!-- ═══ Tableau des diagnostics ═══ -->
         {% else %}
         <div class="history-table-wrap animate-in">
             <table class="history-table" id="historyTable">
+                <!-- En-tête du tableau : colonnes #, Patient, Date, Âge, Sexe, Résultat, Confiance, Actions -->
                 <thead>
                     <tr>
                         <th class="th-num">#</th>
@@ -63,10 +88,14 @@
                         <th class="th-actions">Actions</th>
                     </tr>
                 </thead>
+                <!-- Corps du tableau — une ligne par diagnostic enregistré -->
                 <tbody>
                     {% for r in records %}
+                    <!-- Chaque ligne porte un attribut data-result pour le filtrage JS -->
                     <tr data-result="{{ 'positive' if r.prediction == 1 else 'negative' }}">
+                        <!-- Numéro de ligne -->
                         <td class="cell-num">{{ loop.index }}</td>
+                        <!-- Nom du patient (ou tiret si anonyme) -->
                         <td class="cell-patient">
                             {% if r.patient_first_name or r.patient_last_name %}
                             <span class="patient-name">{{ r.patient_first_name }} {{ r.patient_last_name }}</span>
@@ -74,13 +103,17 @@
                             <span class="patient-anon">&mdash;</span>
                             {% endif %}
                         </td>
+                        <!-- Date du diagnostic (tronquée aux 16 premiers caractères : YYYY-MM-DD HH:MM) -->
                         <td class="cell-date">{{ r.timestamp[:16] }}</td>
+                        <!-- Âge du patient en années -->
                         <td class="cell-age">{{ r.age }} ans</td>
+                        <!-- Sexe avec badge coloré (bleu = masculin, rose = féminin) -->
                         <td>
                             <span class="sex-pill {{ 'male' if r.sex == 'male' else 'female' }}">
                                 {{ 'Masculin' if r.sex == 'male' else 'F&eacute;minin' }}
                             </span>
                         </td>
+                        <!-- Résultat : badge positif (warning) ou négatif (ok) -->
                         <td>
                             {% if r.prediction == 1 %}
                             <span class="result-pill positive">&#9888; Positif</span>
@@ -88,14 +121,17 @@
                             <span class="result-pill negative">&#10003; N&eacute;gatif</span>
                             {% endif %}
                         </td>
+                        <!-- Confiance du modèle avec mini barre de progression -->
                         <td>
                             <div class="confidence-cell">
                                 <div class="confidence-bar-mini">
+                                    <!-- Barre colorée : rouge si positif, verte si négatif -->
                                     <div class="confidence-bar-fill {{ 'fill-danger' if r.prediction == 1 else 'fill-safe' }}" style="width:{{ (r.confidence * 100)|round(1) }}%"></div>
                                 </div>
                                 <span class="confidence-pct">{{ (r.confidence * 100)|round(1) }}%</span>
                             </div>
                         </td>
+                        <!-- Bouton de suppression individuelle (appelle deleteRecord() en JS) -->
                         <td class="cell-actions">
                             <button class="btn-icon" onclick="deleteRecord({{ r.id }})" title="Supprimer">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>

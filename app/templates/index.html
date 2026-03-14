@@ -1,10 +1,25 @@
+<!--
+    index.html — Page d'accueil (Landing Page)
+    ============================================
+    Page d'accueil de PediAppend avec une expérience de défilement en 3 étapes (slides plein écran).
+    Hérite de base.html et masque le footer par défaut.
+
+    Structure en 3 slides :
+    - Slide 1 (Hero)         : Présentation principale, slogan, boutons d'action, badges de confiance
+    - Slide 2 (Performances) : Métriques du modèle (précision, F1, ROC AUC) + fonctionnement en 3 étapes
+    - Slide 3 (Fonctionnalités) : Grille de 6 cartes présentant les capacités de l'application
+
+    Navigation latérale (side-steps) : permet de naviguer entre les 3 slides via des points cliquables.
+-->
 {% extends "base.html" %}
 {% block title %}PediAppend &mdash; Diagnostic pédiatrique de l'appendicite{% endblock %}
 
+<!-- On masque le footer sur la page d'accueil (expérience plein écran) -->
 {% block footer %}{% endblock %}
 
 {% block content %}
-<!-- ═══ SIDE STEP NAV ═══ -->
+<!-- ═══ NAVIGATION LATÉRALE — Points de navigation entre les 3 slides ═══ -->
+<!-- Chaque point (side-step) permet de naviguer vers la slide correspondante -->
 <nav class="side-steps" id="sideSteps">
     <a class="side-step active" data-goto="0">
         <span class="side-step-dot"></span>
@@ -20,12 +35,16 @@
     </a>
 </nav>
 
-<!-- ═══ SLIDE CONTAINER ═══ -->
+<!-- ═══ CONTENEUR DES SLIDES — Viewport de défilement vertical ═══ -->
 <div class="slides-viewport" id="slidesViewport">
 
-<!-- ═══ STEP 1 — HERO ═══ -->
+<!-- ═══ SLIDE 1 — HERO (Section principale d'accueil) ═══ -->
+<!-- Présentation de l'application avec titre, description, boutons CTA et badges de confiance -->
 <section class="hero landing-step active" id="step-hero">
+    <!-- Compteur de slide (01/03) -->
     <div class="step-counter"><span class="step-counter-num">01</span><span class="step-counter-sep">/</span><span class="step-counter-total">03</span></div>
+
+    <!-- Éléments décoratifs d'arrière-plan (orbes animés et grille) -->
     <div class="hero-bg">
         <div class="hero-orb hero-orb-1"></div>
         <div class="hero-orb hero-orb-2"></div>
@@ -33,35 +52,44 @@
         <div class="hero-grid"></div>
     </div>
 
+    <!-- Contenu principal du Hero — disposition en 2 colonnes (texte + image) -->
     <div class="hero-split animate-in">
+        <!-- Colonne gauche : texte, titre, description et boutons d'action -->
         <div class="hero-text">
+            <!-- Badge d'en-tête indiquant le type d'outil -->
             <div class="hero-badge">
                 <span class="badge-icon">&#129504;</span>
                 <span class="badge-text">Aide à la Décision Clinique par IA</span>
                 <span class="badge-dot"></span>
             </div>
 
+            <!-- Titre principal de la page d'accueil -->
             <h1>
                 Diagnostic pédiatrique
                 <span class="gradient-line">de l'appendicite</span>
             </h1>
 
+            <!-- Description courte du modèle utilisé -->
             <p class="hero-subtitle">
                 Modèle <strong>Random Forest</strong> optimisé
                 avec explicabilité SHAP &mdash; offrant aux pédiatres une confiance
                 diagnostique transparente et fondée sur les preuves, en quelques secondes.
             </p>
 
+            <!-- Boutons d'appel à l'action (CTA) -->
             <div class="hero-ctas">
+                <!-- Bouton principal : lance un diagnostic -->
                 <a href="{{ url_for('diagnosis') }}" class="btn-primary-hero">
                     &#129657; Lancer un diagnostic &rarr;
                     <span class="shine"></span>
                 </a>
+                <!-- Bouton secondaire : scrolle vers la slide "Comment ça marche" -->
                 <a href="javascript:void(0)" class="btn btn-ghost btn-lg" data-goto="1">
                     &#10024; Comment ça marche
                 </a>
             </div>
 
+            <!-- Badges de confiance — rassurent les utilisateurs sur la sécurité et la fiabilité -->
             <div class="trust-badges">
                 <span class="trust-badge"><span class="tb-icon">&#128274;</span> Données sécurisées</span>
                 <span class="trust-badge"><span class="tb-icon">&#10003;</span> Validé cliniquement</span>
@@ -69,7 +97,7 @@
             </div>
         </div>
 
-        <!-- Hero image — Anatomical digestive system illustration -->
+        <!-- Colonne droite : illustration anatomique du système digestif -->
         <div class="hero-visual animate-in">
             <div class="hero-image-container anatomy-hero">
                 <img src="{{ url_for('static', filename='img/anatomy-body.jpg') }}" alt="Illustration anatomique du système digestif" class="hero-image" />
@@ -78,7 +106,7 @@
         </div>
     </div>
 
-    <!-- Step arrow -->
+    <!-- Flèche de navigation vers la slide suivante -->
     <div class="slide-arrow-wrap">
         <button class="slide-arrow-btn next-slide" data-dir="next" aria-label="Section suivante">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 4L10 16M10 16L16 10M10 16L4 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -87,17 +115,21 @@
     </div>
 </section>
 
-<!-- ═══ STEP 2 — PERFORMANCE & HOW IT WORKS ═══ -->
+<!-- ═══ SLIDE 2 — PERFORMANCES & FONCTIONNEMENT ═══ -->
+<!-- Deux sous-sections : métriques du modèle ML + explication en 3 étapes du processus de diagnostic -->
 <section class="landing-step slide-combined" id="step-how">
+    <!-- Compteur de slide (02/03) -->
     <div class="step-counter"><span class="step-counter-num">02</span><span class="step-counter-sep">/</span><span class="step-counter-total">03</span></div>
 
-    <!-- Stats block -->
+    <!-- Sous-section 1 : Métriques de performance du modèle Random Forest -->
     <div class="slide-section-block">
         <div class="section-header animate-in" style="padding-bottom:0">
             <div class="section-badge">&#128202; Performance du modèle</div>
             <h2>Métriques validées</h2>
         </div>
+        <!-- Grille de 4 statistiques clés : Précision, F1, ROC AUC, Temps d'analyse -->
         <div class="stats-grid animate-in">
+            <!-- Carte : Précision du modèle (93.6%) -->
             <div class="stat-item">
                 <div class="stat-icon-box cyan">&#128200;</div>
                 <div class="stat-value" data-count="93.6">0</div>
@@ -105,6 +137,7 @@
                 <div class="stat-label">Précision du modèle</div>
                 <div class="stat-sub">Meilleur : Random Forest</div>
             </div>
+            <!-- Carte : Score F1 (94.8%) — harmonie entre précision et rappel -->
             <div class="stat-item">
                 <div class="stat-icon-box emerald">&#127919;</div>
                 <div class="stat-value" data-count="94.8">0</div>
@@ -112,6 +145,7 @@
                 <div class="stat-label">Score F1</div>
                 <div class="stat-sub">Précision &times; Rappel</div>
             </div>
+            <!-- Carte : ROC AUC (97.6%) — aire sous la courbe ROC -->
             <div class="stat-item">
                 <div class="stat-icon-box violet">&#128201;</div>
                 <div class="stat-value" data-count="97.6">0</div>
@@ -119,6 +153,7 @@
                 <div class="stat-label">ROC AUC</div>
                 <div class="stat-sub">Aire sous la courbe</div>
             </div>
+            <!-- Carte : Temps d'analyse (<2 secondes) -->
             <div class="stat-item">
                 <div class="stat-icon-box orange">&#9889;</div>
                 <div class="stat-value">&lt;2s</div>
@@ -129,16 +164,18 @@
         </div>
     </div>
 
-    <!-- Divider -->
+    <!-- Séparateur visuel entre les deux sous-sections -->
     <div class="slide-divider animate-in"></div>
 
-    <!-- How it works block -->
+    <!-- Sous-section 2 : Comment ça marche — Processus en 3 étapes -->
     <div class="slide-section-block">
         <div class="section-header animate-in" style="padding-bottom:0">
             <div class="section-badge">&#128736; Comment ça marche</div>
             <h2>Trois étapes simples</h2>
         </div>
+        <!-- Grille des 3 étapes avec connecteurs visuels (flèches) entre chaque -->
         <div class="how-grid">
+            <!-- Étape 1 : Saisie des données patient -->
             <div class="how-step animate-in">
                 <div class="how-number">1</div>
                 <div class="how-icon-wrap cyan">&#128221;</div>
@@ -146,6 +183,7 @@
                 <p>Renseignez les données démographiques, symptômes, résultats de laboratoire et échographiques.</p>
             </div>
             <div class="how-connector animate-in"><span>&rarr;</span></div>
+            <!-- Étape 2 : Analyse par le modèle IA -->
             <div class="how-step animate-in">
                 <div class="how-number">2</div>
                 <div class="how-icon-wrap violet">&#129504;</div>
@@ -153,6 +191,7 @@
                 <p>Le modèle Random Forest traite 21 variables cliniques.</p>
             </div>
             <div class="how-connector animate-in"><span>&rarr;</span></div>
+            <!-- Étape 3 : Résultats avec explicabilité SHAP -->
             <div class="how-step animate-in">
                 <div class="how-number">3</div>
                 <div class="how-icon-wrap emerald">&#128202;</div>
@@ -162,7 +201,7 @@
         </div>
     </div>
 
-    <!-- Step arrows -->
+    <!-- Flèches de navigation : précédent (Accueil) et suivant (Fonctionnalités) -->
     <div class="slide-arrow-wrap">
         <button class="slide-arrow-btn prev-slide" data-dir="prev" aria-label="Section précédente">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 16L10 4M10 4L4 10M10 4L16 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -175,17 +214,20 @@
     </div>
 </section>
 
-<!-- ═══ STEP 3 — FEATURES & CTA ═══ -->
+<!-- ═══ SLIDE 3 — FONCTIONNALITÉS & CTA ═══ -->
+<!-- Grille de 6 cartes présentant les fonctionnalités principales de PediAppend -->
 <section class="landing-step slide-combined" id="step-features">
+    <!-- Compteur de slide (03/03) -->
     <div class="step-counter"><span class="step-counter-num">03</span><span class="step-counter-sep">/</span><span class="step-counter-total">03</span></div>
 
-    <!-- Features block -->
     <div class="slide-section-block">
         <div class="section-header animate-in">
             <div class="section-badge">&#10024; Capacités principales</div>
             <h2>Conçu pour la médecine moderne</h2>
         </div>
+        <!-- Grille de 6 cartes de fonctionnalités -->
         <div class="features-grid">
+            <!-- Carte 1 : IA Explicable — interprétabilité SHAP -->
             <div class="feature-card animate-in">
                 <div class="feature-card-glow cyan-glow"></div>
                 <div class="feature-card-icon violet">&#129504;</div>
@@ -193,6 +235,7 @@
                 <p>Interprétabilité basée sur SHAP &mdash; chaque prédiction montre les facteurs déterminants.</p>
                 <div class="feature-tag">SHAP &bull; TreeExplainer</div>
             </div>
+            <!-- Carte 2 : Random Forest — algorithme d'ensemble utilisé -->
             <div class="feature-card animate-in">
                 <div class="feature-card-glow violet-glow"></div>
                 <div class="feature-card-icon cyan">&#9889;</div>
@@ -200,6 +243,7 @@
                 <p>Algorithme d'ensemble de 200 arbres de décision optimisés pour une précision maximale.</p>
                 <div class="feature-tag">200 estimateurs &bull; max_depth=10</div>
             </div>
+            <!-- Carte 3 : Sécurité clinique — traitement local des données -->
             <div class="feature-card animate-in">
                 <div class="feature-card-glow emerald-glow"></div>
                 <div class="feature-card-icon emerald">&#128274;</div>
@@ -207,6 +251,7 @@
                 <p>Tout le traitement s'exécute localement — aucune donnée patient ne quitte votre machine.</p>
                 <div class="feature-tag">Local &bull; Privé &bull; Sécurisé</div>
             </div>
+            <!-- Carte 4 : 21 Variables cliniques — types de données analysées -->
             <div class="feature-card animate-in">
                 <div class="feature-card-glow orange-glow"></div>
                 <div class="feature-card-icon orange-icon">&#128202;</div>
@@ -214,6 +259,7 @@
                 <p>Démographie, symptômes, valeurs de laboratoire, échographie et interactions calculées.</p>
                 <div class="feature-tag">Multi-étapes &bull; Validé</div>
             </div>
+            <!-- Carte 5 : Historique des diagnostics — stockage et recherche -->
             <div class="feature-card animate-in">
                 <div class="feature-card-glow cyan-glow"></div>
                 <div class="feature-card-icon cyan">&#128203;</div>
@@ -221,6 +267,7 @@
                 <p>Chaque évaluation est stockée localement avec traçabilité complète et recherche.</p>
                 <div class="feature-tag">SQLite &bull; Recherche</div>
             </div>
+            <!-- Carte 6 : Fondé sur les preuves — jeu de données d'entraînement -->
             <div class="feature-card animate-in">
                 <div class="feature-card-glow violet-glow"></div>
                 <div class="feature-card-icon violet">&#127891;</div>
@@ -231,7 +278,7 @@
         </div>
     </div>
 
-    <!-- Step arrows -->
+    <!-- Flèche de navigation : retour à la slide précédente (Performances) -->
     <div class="slide-arrow-wrap">
         <button class="slide-arrow-btn prev-slide" data-dir="prev" aria-label="Section précédente">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 16L10 4M10 4L4 10M10 4L16 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -240,5 +287,5 @@
     </div>
 </section>
 
-</div><!-- /.slides-viewport -->
+</div><!-- /.slides-viewport — Fin du conteneur de slides -->
 {% endblock %}

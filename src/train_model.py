@@ -1,24 +1,5 @@
-"""
-Model Training Module — Pediatric Appendicitis Diagnosis
-=========================================================
-Responsabilité unique : entraîner les modèles et sélectionner le meilleur.
 
-Ce module ne charge, ne nettoie et ne prétraite aucune donnée.
-Il reçoit des arrays numpy prêts à l'emploi depuis run.py.
-
-Pourquoi des hyperparamètres fixes et non Optuna ?
-  Le tuning Optuna a été testé et a produit de moins bons résultats sur ce
-  dataset (~600 samples). Avec si peu de données, Optuna introduit plus de
-  variance qu'il n'apporte de signal — il overfitte sur le processus de
-  validation lui-même. Les paramètres fixes ci-dessous ont été validés
-  empiriquement et produisent les meilleurs scores observés :
-    RF : Recall=0.9892, Précision=0.9485, AUC=0.9830
-
-Critère de sélection :
-  Priorité 1 : Recall    (FN = appendicite manquée = risque vital)
-  Priorité 2 : Précision (FP = examen inutile, coût moindre)
-  Priorité 3 : ROC-AUC   (tie-breaker)
-"""
+"""Entraînement, comparaison, sélection et sauvegarde des modèles de classification."""
 
 import os
 import sys
@@ -42,29 +23,27 @@ warnings.filterwarnings("ignore")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
 
-MODELS_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "models")
+_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if _ROOT not in sys.path:
+    sys.path.insert(0, _ROOT)
+
+try:
+    from src.config import MODELS_DIR, RANDOM_STATE, CV_FOLDS
+except ImportError:
+    from config import MODELS_DIR, RANDOM_STATE, CV_FOLDS
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# 1. DÉFINITION DES MODÈLES
-# ─────────────────────────────────────────────────────────────────────────────
+                                   
 
 def get_models() -> dict:
-    """
-    Retourne les modèles candidats avec des hyperparamètres validés empiriquement.
-
-      · class_weight="balanced" compense le déséquilibre des classes (~60/40)
-        sans aller jusqu'au sur-échantillonnage.
-      · auto_class_weights="Balanced" est l'équivalent pour CatBoost.
-      · Profondeurs et nombres d'estimateurs adaptés à ~600 samples.
-    """
+    """Return the candidate model set with tuned baseline hyperparameters."""
     return {
         "SVM": SVC(
             kernel="rbf",
             probability=True,
             C=1.0,
             gamma="scale",
-            random_state=42,
+            random_state=RANDOM_STATE,
             class_weight="balanced",
         ),
         "Random Forest": RandomForestClassifier(
@@ -72,52 +51,48 @@ def get_models() -> dict:
             max_depth=10,
             min_samples_split=5,
             min_samples_leaf=2,
-            random_state=42,
-            class_weight=None,      # None > "balanced" : Recall=1.0 vs 0.9892
+            random_state=RANDOM_STATE,
+            class_weight=None,                                                
             n_jobs=-1,
         ),
         "LightGBM": LGBMClassifier(
             n_estimators=100,
             max_depth=6,
-            learning_rate=0.05,     # 0.05 > 0.1 : meilleur AUC (0.9845)
+            learning_rate=0.05,                                         
             num_leaves=31,
-            random_state=42,
+            random_state=RANDOM_STATE,
             class_weight="balanced",
             verbose=-1,
             n_jobs=-1,
         ),
         "CatBoost": CatBoostClassifier(
             iterations=200,
-            depth=10,               # 10 > 6 : meilleur AUC (0.9894)
-            learning_rate=0.01,     # 0.01 > 0.05 : apprentissage plus fin
-            random_seed=42,
+            depth=10,                                               
+            learning_rate=0.01,                                           
+            random_seed=RANDOM_STATE,
             auto_class_weights="Balanced",
             verbose=0,
         ),
     }
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# 2. ENTRAÎNEMENT ET ÉVALUATION
-# ─────────────────────────────────────────────────────────────────────────────
+                                       
 
 def train_and_evaluate(X_train, X_test, y_train, y_test) -> dict:
-    """
-    Entraîne tous les modèles et évalue leurs performances.
-
-    Pour chaque modèle :
-      1. Cross-validation 5-fold sur le train (roc_auc) — mesure la
-         généralisation sans toucher au test set.
-      2. Entraînement final sur tout le train set.
-      3. Évaluation complète sur le test set.
-    """
+    """Train each model, run CV on train split, and compute test metrics."""
+    logger.info(
+        "Train/eval start | X_train=%s | X_test=%s | positives_train=%.3f",
+        X_train.shape,
+        X_test.shape,
+        float(np.mean(y_train)),
+    )
     models  = get_models()
     results = {}
 
     for name, model in models.items():
         logger.info("Entraînement : %s...", name)
 
-        cv_scores = cross_val_score(model, X_train, y_train, cv=5,
+        cv_scores = cross_val_score(model, X_train, y_train, cv=CV_FOLDS,
                                     scoring="roc_auc", n_jobs=-1)
         logger.info("  CV ROC-AUC : %.4f (± %.4f)",
                     cv_scores.mean(), cv_scores.std())
@@ -147,18 +122,10 @@ def train_and_evaluate(X_train, X_test, y_train, y_test) -> dict:
     return results
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# 3. SÉLECTION DU MEILLEUR MODÈLE
-# ─────────────────────────────────────────────────────────────────────────────
+                                         
 
 def select_best_model(results: dict) -> tuple:
-    """
-    Sélectionne le meilleur modèle selon un critère médical explicite.
-
-    Tri lexicographique sur (Recall, Précision, ROC-AUC) :
-      Python compare les tuples élément par élément. Si deux modèles ont
-      le même recall, on départage par précision, puis par AUC.
-    """
+    """Select the best model using recall, then precision, then ROC-AUC."""
     best_name = max(
         results,
         key=lambda k: (
@@ -178,20 +145,11 @@ def select_best_model(results: dict) -> tuple:
     return best_name, best["model"], best["metrics"]
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# 4. SAUVEGARDE DES ARTEFACTS
-# ─────────────────────────────────────────────────────────────────────────────
+                                     
 
 def save_artifacts(model, scaler, feature_names: list,
                    best_name: str, all_results: dict):
-    """
-    Sauvegarde tous les artefacts nécessaires à l'inférence dans /models/.
-
-      best_model.pkl    — modèle sélectionné
-      scaler.pkl        — StandardScaler ajusté sur le train
-      feature_names.pkl — liste ordonnée des features attendues en entrée
-      metrics.json      — métriques de tous les modèles + nom du meilleur
-    """
+    """Persist model artifacts and metrics summary in the models directory."""
     os.makedirs(MODELS_DIR, exist_ok=True)
 
     joblib.dump(model,         os.path.join(MODELS_DIR, "best_model.pkl"))
@@ -206,28 +164,23 @@ def save_artifacts(model, scaler, feature_names: list,
         json.dump(metrics_summary, f, indent=2)
 
     logger.info("Artefacts sauvegardés dans %s", MODELS_DIR)
+    logger.debug("Saved artifacts | best_model=%s | n_features=%d", best_name, len(feature_names))
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# 5. PIPELINE PRINCIPAL
-# ─────────────────────────────────────────────────────────────────────────────
+                               
 
 def main(X_train, X_test, y_train, y_test, scaler, feature_names):
-    """
-    Pipeline d'entraînement principal.
-
-    Reçoit des données DÉJÀ prêtes — ne charge, ne nettoie et ne prétraite rien.
-    L'orchestration avec data_processing.py est déléguée à run.py.
-    """
+    """Execute the training pipeline and return all model results + best name."""
     logger.info("=" * 65)
     logger.info("PEDIATRIC APPENDICITIS — TRAINING PIPELINE")
     logger.info("=" * 65)
+    logger.info("Pipeline input | features=%d", len(feature_names))
 
     results = train_and_evaluate(X_train, X_test, y_train, y_test)
 
     best_name, best_model, best_metrics = select_best_model(results)
 
-    # Rapport de classification détaillé
+    # Final report for the selected champion model.
     y_pred_final = best_model.predict(X_test)
     print("\n" + "=" * 65)
     print(f"RAPPORT FINAL — {best_name}")
@@ -235,7 +188,7 @@ def main(X_train, X_test, y_train, y_test, scaler, feature_names):
     print(classification_report(y_test, y_pred_final,
                                  target_names=["Pas appendicite", "Appendicite"]))
 
-    # Tableau de comparaison
+    # Side-by-side metrics table for all candidates.
     print("=" * 80)
     print(f"{'Modèle':<18} {'Accuracy':>10} {'Précision':>10} "
           f"{'Recall':>10} {'F1':>10} {'ROC-AUC':>10}")
@@ -256,7 +209,7 @@ def main(X_train, X_test, y_train, y_test, scaler, feature_names):
 
 
 if __name__ == "__main__":
-    # Test rapide en développement — utiliser run.py pour l'usage normal.
+    # Quick local run when called directly from this module.
     sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
     from src.data_processing import load_data, optimize_memory, clean_data, preprocess_data
 

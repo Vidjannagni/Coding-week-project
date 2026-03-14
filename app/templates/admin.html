@@ -1,20 +1,44 @@
+<!--
+    admin.html — Panneau d'administration
+    ========================================
+    Tableau de bord réservé aux administrateurs pour gérer les utilisateurs de l'application.
+    Hérite de base.html. Accessible uniquement aux utilisateurs ayant le rôle admin.
+
+    Variables Jinja2 attendues :
+    - users      : liste des utilisateurs (objets avec id, username, is_admin, diag_count)
+    - total_diag : nombre total de diagnostics sur la plateforme
+    - current_user : utilisateur admin actuellement connecté
+
+    Structure :
+    1. En-tête — titre et statistiques globales (nombre d'utilisateurs et diagnostics)
+    2. Tableau des utilisateurs — ID, nom, rôle, diagnostics, actions
+    3. Script JavaScript — fonctions pour basculer le rôle admin et supprimer un utilisateur
+
+    Actions disponibles :
+    - Basculer le rôle admin (promouvoir/rétrograder un utilisateur)
+    - Supprimer un utilisateur et tout son historique de diagnostics
+    Note : L'admin ne peut pas modifier son propre rôle ni se supprimer
+-->
 {% extends "base.html" %}
 {% block title %}Administration — PediAppend{% endblock %}
 {% block content %}
 <section class="admin-section">
     <div class="admin-container">
 
-        <!-- Header -->
+        <!-- ═══ En-tête du panneau d'administration ═══ -->
+        <!-- Titre et compteurs globaux (nombre d'utilisateurs et de diagnostics) -->
         <div class="admin-header">
             <div>
                 <h1>Panneau d'administration</h1>
+                <!-- Statistiques globales : nombre d'utilisateurs et de diagnostics au total -->
                 <p class="admin-subtitle">{{ users|length }} utilisateur{{ 's' if users|length != 1 else '' }} · {{ total_diag }} diagnostic{{ 's' if total_diag != 1 else '' }} au total</p>
             </div>
         </div>
 
-        <!-- Users table -->
+        <!-- ═══ Tableau de gestion des utilisateurs ═══ -->
         <div class="admin-table-wrap">
             <table class="admin-table">
+                <!-- En-tête du tableau : colonnes ID, Utilisateur, Rôle, Diagnostics, Actions -->
                 <thead>
                     <tr>
                         <th>ID</th>
@@ -24,10 +48,14 @@
                         <th>Actions</th>
                     </tr>
                 </thead>
+                <!-- Corps du tableau — une ligne par utilisateur inscrit -->
                 <tbody>
                     {% for u in users %}
+                    <!-- L'attribut id permet de cibler la ligne en JS pour suppression dynamique -->
                     <tr id="user-row-{{ u.id }}">
+                        <!-- ID unique de l'utilisateur en base de données -->
                         <td class="cell-id">{{ u.id }}</td>
+                        <!-- Nom d'utilisateur avec icône SVG -->
                         <td class="cell-username">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <circle cx="12" cy="8" r="4"/>
@@ -35,6 +63,7 @@
                             </svg>
                             {{ u.username }}
                         </td>
+                        <!-- Rôle : badge "Admin" ou "Utilisateur" -->
                         <td>
                             {% if u.is_admin %}
                             <span class="role-pill admin">Admin</span>
@@ -42,16 +71,22 @@
                             <span class="role-pill user">Utilisateur</span>
                             {% endif %}
                         </td>
+                        <!-- Nombre de diagnostics réalisés par cet utilisateur -->
                         <td class="cell-count">{{ u.diag_count }}</td>
+                        <!-- Actions : basculer le rôle admin / supprimer l'utilisateur -->
+                        <!-- L'admin connecté ne voit pas de boutons d'action sur sa propre ligne -->
                         <td class="cell-actions">
                             {% if u.id != current_user.id %}
+                            <!-- Bouton : Promouvoir ou rétrograder le rôle admin -->
                             <button class="btn-sm btn-toggle" onclick="toggleAdmin({{ u.id }})" title="Changer le rôle">
                                 {% if u.is_admin %}Retirer admin{% else %}Rendre admin{% endif %}
                             </button>
+                            <!-- Bouton : Supprimer l'utilisateur et tout son historique -->
                             <button class="btn-sm btn-danger" onclick="deleteUser({{ u.id }}, '{{ u.username }}')" title="Supprimer">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
                             </button>
                             {% else %}
+                            <!-- Aucune action possible sur son propre compte -->
                             <span class="text-muted">—</span>
                             {% endif %}
                         </td>
@@ -64,7 +99,13 @@
     </div>
 </section>
 
+<!-- ═══ Script JavaScript — Fonctions d'administration ═══ -->
 <script>
+/**
+ * toggleAdmin(userId) — Bascule le rôle admin d'un utilisateur
+ * Envoie une requête POST à /admin/toggle/{userId}
+ * Recharge la page en cas de succès, affiche une erreur sinon
+ */
 async function toggleAdmin(userId) {
     if (!confirm('Modifier le rôle de cet utilisateur ?')) return;
     const res = await fetch(`/admin/toggle/${userId}`, { method: 'POST' });
@@ -75,6 +116,11 @@ async function toggleAdmin(userId) {
     }
 }
 
+/**
+ * deleteUser(userId, username) — Supprime un utilisateur et son historique
+ * Envoie une requête DELETE à /admin/delete/{userId}
+ * Supprime la ligne du tableau en cas de succès (sans recharger la page)
+ */
 async function deleteUser(userId, username) {
     if (!confirm(`Supprimer l'utilisateur "${username}" et tout son historique ?`)) return;
     const res = await fetch(`/admin/delete/${userId}`, { method: 'DELETE' });

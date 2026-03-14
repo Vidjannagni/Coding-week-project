@@ -1,11 +1,27 @@
+<!--
+    profile.html — Page de profil utilisateur
+    ============================================
+    Permet à l'utilisateur connecté de consulter et modifier ses informations de profil.
+    Hérite de base.html.
+
+    Variables Jinja2 attendues :
+    - current_user : objet utilisateur Flask-Login (username, is_admin)
+    - diag_count   : nombre de diagnostics réalisés par l'utilisateur
+
+    Structure :
+    1. En-tête du profil — avatar SVG, nom d'utilisateur, compteur de diagnostics, badge admin
+    2. Formulaire de modification — changer le nom d'utilisateur et/ou le mot de passe
+-->
 {% extends "base.html" %}
 {% block title %}Mon Profil — PediAppend{% endblock %}
 {% block content %}
 <section class="profile-section">
     <div class="profile-container">
 
-        <!-- Header -->
+        <!-- ═══ En-tête du profil ═══ -->
+        <!-- Affiche l'avatar, le nom d'utilisateur, le nombre de diagnostics et le badge admin -->
         <div class="profile-header">
+            <!-- Avatar SVG (silhouette utilisateur) -->
             <div class="profile-avatar">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="48" height="48">
                     <circle cx="12" cy="8" r="4"/>
@@ -13,7 +29,9 @@
                 </svg>
             </div>
             <div>
+                <!-- Nom d'utilisateur -->
                 <h1>{{ current_user.username }}</h1>
+                <!-- Sous-titre : nombre de diagnostics réalisés + badge admin si applicable -->
                 <p class="profile-subtitle">
                     {{ diag_count }} diagnostic{{ 's' if diag_count != 1 else '' }} réalisé{{ 's' if diag_count != 1 else '' }}
                     {% if current_user.is_admin %}
@@ -23,24 +41,31 @@
             </div>
         </div>
 
-        <!-- Edit form -->
-        <form method="POST" action="{{ url_for('profile') }}" class="profile-form">
+        <!-- ═══ Formulaire de modification du profil ═══ -->
+        <!-- Envoie les données en POST à la route auth.profile -->
+        <form method="POST" action="{{ url_for('auth.profile') }}" class="profile-form">
             <h2>Modifier mes informations</h2>
 
+            <!-- Champ : Nom d'utilisateur (pré-rempli avec la valeur actuelle) -->
             <div class="form-group">
                 <label for="username">Nom d'utilisateur</label>
                 <input type="text" id="username" name="username" value="{{ current_user.username }}" minlength="3" required autocomplete="username">
             </div>
 
+            <!-- Séparateur visuel avant la section mot de passe -->
             <hr class="profile-divider">
+
+            <!-- Section : Changement de mot de passe -->
             <h3>Changer le mot de passe</h3>
             <p class="form-hint">Laissez les champs vides pour garder le mot de passe actuel.</p>
 
+            <!-- Champ : Mot de passe actuel (requis pour valider l'identité) -->
             <div class="form-group">
                 <label for="current_password">Mot de passe actuel *</label>
                 <input type="password" id="current_password" name="current_password" required autocomplete="current-password">
             </div>
 
+            <!-- Champs : Nouveau mot de passe et confirmation (min 6 caractères) -->
             <div class="form-row">
                 <div class="form-group">
                     <label for="new_password">Nouveau mot de passe</label>
@@ -52,6 +77,7 @@
                 </div>
             </div>
 
+            <!-- Boutons d'action : enregistrer les modifications ou annuler -->
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
                 <a href="{{ url_for('home') }}" class="btn btn-ghost-sm">Annuler</a>
