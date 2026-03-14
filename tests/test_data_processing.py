@@ -41,7 +41,9 @@ class TestLoadData:
 
     def test_diagnosis_values(self, raw_df):
         unique_vals = set(raw_df["Diagnosis"].dropna().unique())
-        assert unique_vals.issubset({0, 1}), f"Valeurs inattendues dans Diagnosis : {unique_vals}"
+        assert unique_vals == {"appendicitis", "no appendicitis"}, (
+            f"Classes inattendues dans Diagnosis : {unique_vals}"
+        )
 
 
                                                              
