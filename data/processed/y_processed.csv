@@ -1,0 +1,783 @@
+Management,Severity,Diagnosis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+,,
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,no appendicitis
+conservative,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+secondary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+secondary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+secondary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+secondary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+secondary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+secondary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+secondary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+secondary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+secondary surgical,uncomplicated,no appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+secondary surgical,uncomplicated,
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+secondary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+secondary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+secondary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+secondary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,no appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+secondary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+secondary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+secondary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+secondary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,no appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+secondary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+secondary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+secondary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+secondary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+secondary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+secondary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+secondary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+simultaneous appendectomy,uncomplicated,no appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,complicated,appendicitis
+secondary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+secondary surgical,complicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis
+primary surgical,uncomplicated,appendicitis

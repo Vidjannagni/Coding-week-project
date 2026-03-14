@@ -1,22 +1,36 @@
+{#
+    register.html — Page d'inscription
+    ================================
+    Formulaire de création de compte pour les nouveaux utilisateurs.
+    Hérite de base.html.
+
+    Structure :
+    - Fond décoratif (orbes)
+    - Carte d'authentification (titre, formulaire, lien de connexion)
+#}
 {% extends "base.html" %}
 {% block title %}Inscription &mdash; PediAppend{% endblock %}
 
 {% block content %}
 <section class="auth-section">
     <div class="auth-container animate-in visible">
-        <!-- Decorative background -->
+        <!-- Fond décoratif — orbes animés pour l'esthétique -->
         <div class="auth-bg">
             <div class="hero-orb hero-orb-1"></div>
             <div class="hero-orb hero-orb-2"></div>
         </div>
 
+        <!-- Carte principale d'inscription -->
         <div class="auth-card">
+            <!-- En-tête : titre et sous-titre -->
             <div class="auth-header">
                 <h1>Créer un compte</h1>
                 <p>Rejoignez PediAppend pour accéder au diagnostic</p>
             </div>
 
-            <form method="POST" action="{{ url_for('register') }}" class="auth-form">
+            <!-- Formulaire d'inscription — envoie les données en POST à la route auth.register -->
+            <form method="POST" action="{{ url_for('auth.register') }}" class="auth-form">
+                <!-- Champ : Nom d'utilisateur (minimum 3 caractères) -->
                 <div class="auth-field">
                     <label for="username">Nom d'utilisateur</label>
                     <div class="auth-input-wrap">
@@ -27,6 +41,7 @@
                     <span class="auth-hint">Minimum 3 caractères</span>
                 </div>
 
+                <!-- Champ : Mot de passe (minimum 6 caractères) -->
                 <div class="auth-field">
                     <label for="password">Mot de passe</label>
                     <div class="auth-input-wrap">
@@ -37,6 +52,7 @@
                     <span class="auth-hint">Minimum 6 caractères</span>
                 </div>
 
+                <!-- Champ : Confirmation du mot de passe (doit correspondre au champ précédent) -->
                 <div class="auth-field">
                     <label for="confirm">Confirmer le mot de passe</label>
                     <div class="auth-input-wrap">
@@ -46,14 +62,16 @@
                     </div>
                 </div>
 
+                <!-- Bouton de soumission du formulaire -->
                 <button type="submit" class="btn btn-primary btn-lg auth-submit">
                     Créer mon compte →
                 </button>
             </form>
 
+            <!-- Lien de redirection vers la page de connexion -->
             <div class="auth-footer">
                 <p>Déjà inscrit ?
-                    <a href="{{ url_for('login') }}">Se connecter</a>
+                    <a href="{{ url_for('auth.login') }}">Se connecter</a>
                 </p>
             </div>
         </div>

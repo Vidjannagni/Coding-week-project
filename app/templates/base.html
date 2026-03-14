@@ -1,63 +1,147 @@
+{#
+    base.html — Template de base (layout principal)
+    ==============================================
+    Layout partagé par toutes les pages.
+    Les templates héritent de ce layout via extends "base.html".
+
+    Blocs :
+    - title   : titre de la page
+    - content : contenu principal
+    - footer  : pied de page (surchargeable/masquable)
+    - scripts : scripts spécifiques à une page
+
+    Script global :
+    - common.js : navbar, animations d'entrée, flash messages
+#}
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Advanced clinical decision support system for pediatric appendicitis diagnosis. AI-powered predictions with SHAP explainability.">
-    <title>{% block title %}PediAppend — AI-Powered Pediatric Appendicitis Diagnosis{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <!-- Lucide Icons CDN (lightweight SVG icon library) -->
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-</head>
-<body>
-
-<!-- ======== NAVBAR ======== -->
-<header class="navbar" id="navbar">
-    <div class="navbar-inner">
-        <a href="{{ url_for('index') }}" class="navbar-logo">
-            <div class="navbar-logo-icon">
-                <i data-lucide="heart" style="width:24px;height:24px;fill:white;stroke:white"></i>
-                <span class="navbar-logo-dot"></span>
-            </div>
-            <div class="navbar-logo-text">
-                <span class="brand">PediAppend</span>
-                <span class="sub">AI Clinical Support</span>
-            </div>
-        </a>
-
-        <nav class="navbar-links">
-            <a href="{{ url_for('index') }}#features">Features</a>
-            <a href="{{ url_for('index') }}#diagnosis">Methodology</a>
-            <a href="{{ url_for('history') }}">History</a>
-            <a href="{{ url_for('index') }}#diagnosis" class="navbar-cta">
-                <i data-lucide="stethoscope" style="width:16px;height:16px"></i>
-                Start Diagnosis
-                <i data-lucide="arrow-right" style="width:16px;height:16px"></i>
+<html lang="fr">
+	<head>
+	    <meta charset="UTF-8">
+	    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	    <meta name="theme-color" content="#06b6d4">
+	    <!-- Titre de la page — surchargeable par chaque page enfant via le block title -->
+	    <title>{% block title %}PediAppend — AI-Powered Pediatric Appendicitis Diagnosis{% endblock %}</title>
+	    <meta name="description" content="Système d'aide à la décision clinique pour le diagnostic pédiatrique de l'appendicite par apprentissage automatique.">
+	    <link rel="icon" href="{{ url_for('static', filename='img/favicon.svg') }}" type="image/svg+xml">
+	    <!-- Feuille de style principale de l'application -->
+	    <link rel="stylesheet" href="{{ url_for('static', filename='css/core.css') }}">
+	    <link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
+	    <link rel="stylesheet" href="{{ url_for('static', filename='css/form.css') }}">
+	    <link rel="stylesheet" href="{{ url_for('static', filename='css/result.css') }}">
+	    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages.css') }}">
+	</head>
+	<body>
+	    <a class="skip-link" href="#mainContent">Aller au contenu</a>
+	    <!-- ═══ Navbar — Barre de navigation principale ═══ -->
+	    <!-- Contient le logo, les liens de navigation et le menu utilisateur (connecté/déconnecté) -->
+	    <header class="navbar" id="navbar">
+        <div class="navbar-inner">
+            <!-- Logo et nom de l'application (lien vers la page d'accueil) -->
+            <a href="{{ url_for('home') }}" class="logo">
+                <div class="logo-icon">
+                    ♥
+                    <!-- Point animé (pulsation) à côté du cœur -->
+                    <span class="pulse-dot"></span>
+                </div>
+                <div class="logo-text">
+                    <span class="name">PediAppend</span>
+                    <span class="sub">Aide à la Décision Clinique</span>
+                </div>
             </a>
-        </nav>
-    </div>
-</header>
 
-<!-- ======== FLASH MESSAGES ======== -->
-{% with messages = get_flashed_messages(with_categories=true) %}
-{% if messages %}
-<div class="flash-messages" id="flashMessages">
-    {% for category, message in messages %}
-    <div class="flash-msg {{ category }}">{{ message }}</div>
-    {% endfor %}
-</div>
-{% endif %}
-{% endwith %}
+            <!-- Liens de navigation principaux -->
+            <nav class="nav-links">
+                <a href="{{ url_for('home') }}">Accueil</a>
+                <!-- Les liens Diagnostic et Historique ne sont visibles que pour les utilisateurs connectés -->
+                {% if current_user.is_authenticated %}
+                <a href="{{ url_for('diagnosis') }}">Diagnostic</a>
+                <a href="{{ url_for('auth.history') }}">Historique</a>
+                {% endif %}
 
-<!-- ======== MAIN CONTENT ======== -->
-{% block content %}{% endblock %}
+                {% if current_user.is_authenticated %}
+                <!-- Menu utilisateur connecté : profil, admin (si admin), déconnexion -->
+                <div class="nav-user">
+                    <!-- Lien vers la page de profil avec icône SVG et nom d'utilisateur -->
+                    <a href="{{ url_for('auth.profile') }}" class="nav-user-link" title="Mon profil">
+                        <svg class="nav-user-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="22" height="22">
+                            <circle cx="12" cy="8" r="4"/>
+                            <path d="M4 21v-1a6 6 0 0 1 12 0v1"/>
+                        </svg>
+                        <span class="nav-user-name">{{ current_user.username }}</span>
+                    </a>
+                    <!-- Bouton d'administration — visible uniquement pour les utilisateurs admin -->
+                    {% if current_user.is_admin %}
+                    <a href="{{ url_for('auth.admin_dashboard') }}" class="btn btn-ghost-sm btn-admin" title="Administration">
+                        <!-- Icône engrenage SVG pour le panneau d'administration -->
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                        </svg>
+                        Admin
+                    </a>
+                    {% endif %}
+                    <!-- Bouton de déconnexion -->
+                    <a href="{{ url_for('auth.logout') }}" class="btn btn-ghost-sm">Déconnexion</a>
+                </div>
+                <!-- Bouton d'appel à l'action pour lancer un diagnostic (utilisateur connecté) -->
+                <a href="{{ url_for('diagnosis') }}" class="btn btn-primary">
+                    🩺 Lancer un diagnostic →
+                </a>
+                {% else %}
+                <!-- Boutons pour les utilisateurs non connectés : connexion et inscription -->
+                <a href="{{ url_for('auth.login') }}" class="btn btn-ghost-sm">Connexion</a>
+                <a href="{{ url_for('auth.register') }}" class="btn btn-primary">
+                    Créer un compte →
+                </a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
 
-<script src="{{ url_for('static', filename='js/main.js') }}"></script>
-<script>
-    // Initialize Lucide icons
-    if (typeof lucide !== 'undefined') {
-        lucide.createIcons();
-    }
-</script>
+    <!-- ═══ Flash Messages — Messages temporaires Flask ═══ -->
+    <!-- Affiche les notifications (succès, erreur, info) définies via flash() dans les routes Flask -->
+	    {% with messages = get_flashed_messages(with_categories=true) %}
+	    {% if messages %}
+	    <div class="flash-messages" role="status" aria-live="polite" aria-atomic="true">
+	        {% for category, message in messages %}
+	        <!-- Chaque message a une classe CSS correspondant à sa catégorie (success, error, info, etc.) -->
+	        <div class="flash-msg {{ category }}">{{ message }}</div>
+	        {% endfor %}
+	    </div>
+	    {% endif %}
+	    {% endwith %}
+
+	    <!-- ═══ Main Content — Contenu principal de la page ═══ -->
+	    <!-- Chaque page enfant injecte son contenu ici via le block content -->
+	    <main id="mainContent" tabindex="-1">
+	        {% block content %}{% endblock %}
+	    </main>
+
+    <!-- ═══ Footer — Pied de page ═══ -->
+    <!-- Surchargeable via le block footer (ex: index.html le masque) -->
+    {% block footer %}
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <!-- Branding et copyright -->
+            <div class="footer-brand">
+                <span class="footer-logo">♥ PediAppend</span>
+                <span class="footer-copy">&copy; 2026 — Aide à la décision clinique par IA</span>
+            </div>
+            <!-- Liens rapides du pied de page (adaptés selon l'état de connexion) -->
+            <div class="footer-links">
+                <a href="{{ url_for('home') }}">Accueil</a>
+                {% if current_user.is_authenticated %}
+                <a href="{{ url_for('diagnosis') }}">Diagnostic</a>
+                <a href="{{ url_for('auth.history') }}">Historique</a>
+                <a href="{{ url_for('auth.profile') }}">Profil</a>
+                {% endif %}
+            </div>
+        </div>
+    </footer>
+    {% endblock %}
+
+    <!-- Chargement du script JavaScript commun (navbar, animations d'entrée, flash messages) -->
+    <script src="{{ url_for('static', filename='js/common.js') }}"></script>
+    <!-- Block scripts : permet à chaque page d'ajouter ses scripts spécifiques -->
+    {% block scripts %}{% endblock %}
 </body>
 </html>

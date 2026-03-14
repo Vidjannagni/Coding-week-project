@@ -1,26 +1,7 @@
-"""
-Data Processing Module — Pediatric Appendicitis Diagnosis  (v3)
-===============================================================
-Responsabilité : transformer les données brutes en données ML-ready.
-
-Pipeline de nettoyage (clean_data) — stratégie d'imputation en cascade :
-  1. Suppression des colonnes cibles parasites (Management, Severity)
-  2. Suppression des colonnes avec > 50% de NaN
-  3. Reconstruction du BMI depuis poids et taille (formule exacte), puis
-     suppression de poids et taille pour éviter la redondance
-  4. Imputation par corrélation pour les paires fortement liées (|r| > 0.80) :
-     on ajuste une régression linéaire sur les lignes complètes, puis on
-     prédit les NaN — bien plus précis que la médiane globale
-  5. Médiane en dernier recours pour les NaN résiduels
-  6. Suppression des doublons
-  7. Capping des outliers par IQR (on ne supprime pas, on ramène aux bornes)
-
-Feature Engineering dans clean_data :
-  - WBC_CRP_Ratio             : ratio WBC / (CRP + 0.1)
-  - Neutrophil_WBC_Interaction : Neutrophil_Percentage × WBC_Count
-"""
+"""Préparation des données: chargement, nettoyage, feature engineering et prétraitement."""
 
 import os
+import sys
 import logging
 import numpy as np
 import pandas as pd
@@ -32,18 +13,29 @@ from sklearn.impute import SimpleImputer
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
 
-DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
+# Ensure imports work both as package and as direct script execution.
+_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if _ROOT not in sys.path:
+    sys.path.insert(0, _ROOT)
+
+try:
+    from src.config import (
+        DATA_DIR, TARGET_COL, TARGET_COLS, LEAKAGE_COLS, CIRCULAR_COLS, WEAK_COLS,
+        MISSING_THRESHOLD, CORR_THRESHOLD, IQR_FACTOR, MIN_CORR_TRAIN_SIZE,
+        HEIGHT_CM_THRESHOLD, CATEGORY_RATIO_THRESHOLD, RANDOM_STATE, TEST_SIZE,
+    )
+except ImportError:
+    from config import (
+        DATA_DIR, TARGET_COL, TARGET_COLS, LEAKAGE_COLS, CIRCULAR_COLS, WEAK_COLS,
+        MISSING_THRESHOLD, CORR_THRESHOLD, IQR_FACTOR, MIN_CORR_TRAIN_SIZE,
+        HEIGHT_CM_THRESHOLD, CATEGORY_RATIO_THRESHOLD, RANDOM_STATE, TEST_SIZE,
+    )
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# 1. CHARGEMENT
-# ─────────────────────────────────────────────────────────────────────────────
+                       
 
 def load_data(data_dir: str = DATA_DIR) -> pd.DataFrame:
-    """
-    Charge le dataset Regensburg Pediatric Appendicitis.
-    Télécharge depuis l'UCI ML Repository si le fichier local est absent.
-    """
+    """Load the dataset locally, or download and cache it on first run."""
     csv_path = os.path.join(data_dir, "appendicitis.csv")
 
     if os.path.exists(csv_path):
@@ -69,15 +61,14 @@ def load_data(data_dir: str = DATA_DIR) -> pd.DataFrame:
             logger.error("Échec du téléchargement : %s", e)
             raise
 
+    logger.info("Dataset ready | rows=%d | cols=%d", len(df), len(df.columns))
     return df
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# 2. OPTIMISATION MÉMOIRE
-# ─────────────────────────────────────────────────────────────────────────────
+                                 
 
 def optimize_memory(df: pd.DataFrame) -> pd.DataFrame:
-    """Downcast des types numériques, colonnes textuelles → category."""
+    """Reduce dataframe memory footprint by downcasting numeric/object columns."""
     mem_before = df.memory_usage(deep=True).sum() / 1024**2
     logger.info("Mémoire AVANT : %.2f MB", mem_before)
     df_opt = df.copy()
@@ -87,42 +78,24 @@ def optimize_memory(df: pd.DataFrame) -> pd.DataFrame:
     for col in df_opt.select_dtypes(include=["int64", "int32", "int16"]).columns:
         df_opt[col] = pd.to_numeric(df_opt[col], downcast="integer")
     for col in df_opt.select_dtypes(include=["object"]).columns:
-        if df_opt[col].nunique() / len(df_opt) < 0.5:
+        if df_opt[col].nunique() / len(df_opt) < CATEGORY_RATIO_THRESHOLD:
             df_opt[col] = df_opt[col].astype("category")
 
     mem_after = df_opt.memory_usage(deep=True).sum() / 1024**2
     logger.info("Mémoire APRÈS : %.2f MB (réduction %.1f%%)",
                 mem_after, (1 - mem_after / mem_before) * 100)
+    logger.debug("Dtypes after optimize_memory: %s", df_opt.dtypes.value_counts().to_dict())
     return df_opt
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# 3. HELPERS D'IMPUTATION
-# ─────────────────────────────────────────────────────────────────────────────
+                                 
 
 def _impute_bmi(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Reconstruit le BMI depuis les colonnes poids et taille quand elles existent,
-    puis supprime poids et taille pour éliminer la redondance parfaite.
-
-    Formule exacte : BMI = poids_kg / taille_m²
-    Si la taille est en cm (valeur médiane > 3), on divise d'abord par 100.
-
-    Trois cas possibles pour chaque ligne :
-      a) BMI déjà connu → on le garde intact, rien n'est modifié.
-      b) BMI manquant, poids ET taille disponibles → calcul exact.
-      c) BMI manquant, poids ou taille également manquants → NaN conservé,
-         sera traité par imputation par corrélation ou médiane à l'étape suivante.
-
-    Pourquoi supprimer poids et taille ensuite ?
-    Garder les trois introduirait une colinéarité parfaite (BMI est une
-    fonction déterministe de poids et taille), ce qui perturbe les modèles
-    linéaires et gonfle artificiellement l'importance de ces variables dans
-    les arbres de décision.
-    """
+    """Reconstruct missing BMI from weight/height when possible, then drop both."""
+       
     df = df.copy()
 
-    # Recherche insensible à la casse pour trouver les bonnes colonnes
+    # Case-insensitive column lookup to support naming variants.
     col_map    = {c.lower(): c for c in df.columns}
     bmi_col    = col_map.get("bmi")
     weight_col = col_map.get("weight") or col_map.get("weight_kg")
@@ -137,14 +110,14 @@ def _impute_bmi(df: pd.DataFrame) -> pd.DataFrame:
         logger.info("Colonnes poids/taille non trouvées — BMI non recalculable par formule.")
         return df
 
-    # Détection automatique de l'unité : médiane > 3 → probable cm
+    # If median height is > threshold, values are likely in centimeters.
     height_median = df[height_col].median()
-    height_in_cm  = height_median > 3.0
+    height_in_cm  = height_median > HEIGHT_CM_THRESHOLD
     height_m      = df[height_col] / 100.0 if height_in_cm else df[height_col]
     if height_in_cm:
         logger.info("Taille détectée en cm (médiane=%.1f) — conversion en mètres.", height_median)
 
-    # On ne calcule que les BMI manquants où poids ET taille sont disponibles
+    # Compute BMI only where source values are valid and BMI is missing.
     mask_missing  = df[bmi_col].isna()
     mask_has_data = df[weight_col].notna() & df[height_col].notna() & (height_m > 0)
     mask_calc     = mask_missing & mask_has_data
@@ -160,7 +133,7 @@ def _impute_bmi(df: pd.DataFrame) -> pd.DataFrame:
     if n_still > 0:
         logger.info("%d BMI toujours manquants → traités à l'étape suivante.", n_still)
 
-    # Suppression poids + taille
+    # Drop raw height/weight to avoid deterministic redundancy with BMI.
     cols_to_drop = [c for c in [weight_col, height_col] if c in df.columns]
     df = df.drop(columns=cols_to_drop)
     logger.info("Colonnes supprimées après reconstruction BMI : %s", cols_to_drop)
@@ -168,36 +141,17 @@ def _impute_bmi(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def _impute_by_correlation(df: pd.DataFrame,
-                            corr_threshold: float = 0.80,
-                            target_col: str = "Diagnosis") -> pd.DataFrame:
-    """
-    Imputation par régression linéaire pour les paires fortement corrélées.
-
-    Pourquoi est-ce mieux que la médiane ?
-    La médiane utilise uniquement la distribution marginale d'une variable,
-    en ignorant totalement le profil du patient. La régression utilise la
-    relation conditionnelle : si WBC_Count = 15 000 et que Neutrophil_%
-    lui est corrélé à 0.85, on peut prédire une valeur de Neutrophil_%
-    qui respecte ce lien biologique, bien plus réaliste que la médiane globale.
-
-    Algorithme pour chaque paire (A, B) avec |r| ≥ seuil :
-      - Si A a des NaN et B est connu pour ces lignes → régression A ~ B
-        ajustée sur les lignes complètes, puis prédiction des NaN de A.
-      - Si B a des NaN et A est connu → régression B ~ A, même logique.
-      - Si A et B sont simultanément NaN → impossible, on laisse pour le fallback.
-
-    On trie les paires par corrélation décroissante pour exploiter en premier
-    les relations les plus solides — une valeur prédite par r=0.95 sera
-    elle-même disponible pour aider une prédiction suivante.
-    """
+                            corr_threshold: float = CORR_THRESHOLD,
+                            target_col: str = TARGET_COL) -> pd.DataFrame:
+    """Impute missing numeric values using linear regression on correlated pairs."""
     df = df.copy()
     num_cols = [c for c in df.select_dtypes(include=[np.number]).columns
                 if c != target_col]
 
-    # Matrice de corrélation calculée sur les lignes sans NaN (comportement par défaut)
+    # Correlation matrix over numeric features only.
     corr_matrix = df[num_cols].corr().abs()
 
-    # Collecte des paires du triangle supérieur uniquement (évite les doublons)
+    # Use upper triangle pairs only to avoid duplicates.
     pairs = [
         (col_a, col_b, corr_matrix.loc[col_a, col_b])
         for i, col_a in enumerate(num_cols)
@@ -214,21 +168,21 @@ def _impute_by_correlation(df: pd.DataFrame,
                 len(pairs), corr_threshold)
 
     total_imputed = 0
-    # Trier par corrélation décroissante : les meilleures paires d'abord
+    # Strongest correlations first to maximize useful imputations early.
     for col_a, col_b, r in sorted(pairs, key=lambda x: -x[2]):
         for target_var, predictor_var in [(col_a, col_b), (col_b, col_a)]:
             nan_target    = df[target_var].isna()
             nan_predictor = df[predictor_var].isna()
 
-            # Lignes à prédire : target_var manquant, predictor_var connu
+            # Predict rows where target is missing but predictor exists.
             mask_predict = nan_target & ~nan_predictor
             if mask_predict.sum() == 0:
                 continue
 
-            # Lignes d'entraînement : les deux colonnes sont connues
+            # Fit rows where both variables are available.
             train_mask = ~nan_target & ~nan_predictor
-            if train_mask.sum() < 5:
-                # Pas assez de données pour une régression fiable
+            if train_mask.sum() < MIN_CORR_TRAIN_SIZE:
+                # Skip under-sampled regressions.
                 continue
 
             reg = LinearRegression()
@@ -241,65 +195,22 @@ def _impute_by_correlation(df: pd.DataFrame,
             logger.info("  %s ← %s (r=%.3f) : %d valeurs imputées.",
                         target_var, predictor_var, r, mask_predict.sum())
 
-            # Relire les masques après chaque imputation :
-            # target_var a peut-être été complété et peut maintenant servir
-            # de prédicteur pour une autre variable dans les itérations suivantes.
+            # Masks are recomputed each loop, so newly imputed values can help later pairs.
 
     logger.info("Imputation par corrélation : %d valeurs imputées.", total_imputed)
     return df
 
 
 def _drop_correlated_features(df: pd.DataFrame,
-                               corr_threshold: float = 0.80,
-                               target_col: str = "Diagnosis",
+                               corr_threshold: float = CORR_THRESHOLD,
+                               target_col: str = TARGET_COL,
                                original_nan_counts: pd.Series = None) -> tuple:
-    """
-    Supprime les colonnes redondantes dans les paires fortement corrélées.
-
-    Cette fonction doit être appelée APRÈS l'imputation et le feature engineering,
-    car on a besoin des deux colonnes d'une paire pour :
-      a) imputer l'une à partir de l'autre (étape 4)
-      b) créer des features d'interaction (étape 5)
-    On ne supprime qu'une fois ces deux utilisations terminées.
-
-    Algorithme glouton (greedy) :
-      On utilise une approche gloutonne plutôt que paire par paire pour gérer
-      les clusters de corrélation (A-B et B-C fortement corrélées : une approche
-      naïve pourrait garder A et C qui sont peut-être elles aussi corrélées).
-
-      À chaque itération :
-        1. Calculer la matrice de corrélation sur les colonnes restantes.
-        2. Compter pour chaque colonne combien d'autres colonnes elle dépasse
-           le seuil (son "score de redondance").
-        3. Parmi les colonnes avec score > 0, identifier celle à supprimer :
-             → Priorité 1 : garder celle avec la plus forte corrélation à la cible.
-               La colonne la plus discriminante pour le diagnostic est la plus précieuse.
-             → Priorité 2 (ex æquo) : garder celle qui avait le moins de NaN à
-               l'origine. Ses valeurs sont "plus vraies" que des valeurs imputées.
-             → Priorité 3 (ex æquo) : garder la première alphabétiquement
-               (critère stable et reproductible).
-        4. Supprimer cette colonne et recommencer jusqu'à ce qu'aucune paire
-           ne dépasse le seuil.
-
-    Args:
-        df                 : DataFrame après imputation et feature engineering.
-        corr_threshold     : Seuil de corrélation (défaut 0.80).
-        target_col         : Colonne cible à exclure de la suppression.
-        original_nan_counts: pd.Series avec le nombre de NaN par colonne
-                             AVANT imputation, pour guider le choix.
-
-    Returns:
-        (df_reduced, dropped_columns) — DataFrame allégé et liste des colonnes supprimées.
-    """
+    """Drop redundant numeric features while preserving target-correlated signals."""
     df = df.copy()
     num_cols = [c for c in df.select_dtypes(include=[np.number]).columns
                 if c != target_col]
 
-    # Corrélation de chaque feature avec la cible — plus c'est élevé, plus on veut garder
-    # La colonne cible est encore au format texte ("appendicitis" / "no appendicitis")
-    # à ce stade — preprocess_data n'a pas encore été appelée.
-    # On l'encode temporairement en 0/1 uniquement pour le calcul de corrélation,
-    # sans modifier le DataFrame réel.
+    # Build a temporary numeric target to score feature usefulness.
     target_numeric = df[target_col].copy()
     if target_numeric.dtype.name in ("object", "category"):
         target_numeric = target_numeric.astype(str).str.strip().str.lower()
@@ -307,51 +218,46 @@ def _drop_correlated_features(df: pd.DataFrame,
             lambda v: 0 if "no" in v else (1 if "appendicitis" in v else np.nan)
         )
 
-    # On construit un DataFrame temporaire numérique pour la corrélation
+    # Compute correlation with target without mutating the original dataframe.
     df_for_corr = df[num_cols].copy()
     df_for_corr[target_col] = target_numeric.values
-
+    # Greedy loop: drop one redundant column at a time.
     target_corr = df_for_corr.corr()[target_col].abs().drop(target_col)
 
     dropped = []
 
-    # Boucle gloutonne : on continue tant qu'il reste des paires au-dessus du seuil
+                                                                                   
     while True:
-        # Recalculer sur les colonnes restantes à chaque itération
+                                    # Recompute on remaining columns after each drop.
         remaining = [c for c in num_cols if c not in dropped]
         if len(remaining) < 2:
             break
 
         corr_matrix = df[remaining].corr().abs()
 
-        # Score de redondance : combien d'autres colonnes dépassent le seuil
-        # (on exclut la diagonale qui vaut toujours 1.0)
+                                            # Redundancy score = number of columns above threshold.
         np.fill_diagonal(corr_matrix.values, 0)
         redundancy_score = (corr_matrix >= corr_threshold).sum()
 
         if redundancy_score.max() == 0:
-            # Plus aucune paire au-dessus du seuil : on a terminé
+            # No redundant pair remains.
             break
 
-        # Identifier la colonne la plus redondante
-        # En cas d'égalité du score, on départage par corrélation avec la cible
-        # (on veut SUPPRIMER celle qui est la MOINS corrélée à la cible)
+                            # Keep columns with stronger target link; drop weaker ones first.
         candidates = redundancy_score[redundancy_score > 0]
 
-        # Trouver la colonne à supprimer :
-        # parmi les candidates, celle avec la plus faible corrélation à la cible
-        # — car c'est la moins utile pour prédire le diagnostic.
+                        # Tie-break with original missingness, then stable alphabetical order.
         col_to_drop = min(
             candidates.index,
             key=lambda c: (
-                target_corr.get(c, 0),          # priorité 1 : garder les + corrélées à la cible
-                -(original_nan_counts.get(c, 0)  # priorité 2 : garder celles avec moins de NaN
+                                target_corr.get(c, 0),
+                                -(original_nan_counts.get(c, 0)
                   if original_nan_counts is not None else 0),
-                c                                # priorité 3 : ordre alphabétique (stable)
+                                c
             )
         )
 
-        # Identifier avec quelles colonnes elle était en conflit (pour le log)
+                # Keep traceability in logs about why a column is removed.
         conflicting = corr_matrix[col_to_drop][corr_matrix[col_to_drop] >= corr_threshold].index.tolist()
         logger.info(
             "Étape 9 — Suppression '%s' (r ≥ %.2f avec : %s | corr_cible=%.3f)",
@@ -372,41 +278,45 @@ def _drop_correlated_features(df: pd.DataFrame,
     return df, dropped
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# 4. NETTOYAGE PRINCIPAL
-# ─────────────────────────────────────────────────────────────────────────────
+                                
 
 def clean_data(df: pd.DataFrame,
-               missing_threshold: float = 0.50,
-               corr_threshold: float = 0.80) -> pd.DataFrame:
-    """
-    Nettoie et enrichit le dataset en 9 étapes ordonnées.
-
-    Étape 1 — Suppression des colonnes parasites (Management, Severity).
-    Étape 2 — Suppression des colonnes features avec > missing_threshold de NaN.
-    Étape 3 — Reconstruction du BMI par formule, suppression poids et taille.
-    Étape 4 — Imputation par régression pour les paires |r| > corr_threshold.
-    Étape 5 — Feature engineering (WBC_CRP_Ratio, Neutrophil_WBC_Interaction).
-               Créé APRÈS imputation pour être calculé sur données complètes.
-    Étape 6 — Médiane/mode en dernier recours pour les NaN résiduels.
-    Étape 7 — Suppression des doublons.
-    Étape 8 — Capping IQR des outliers.
-    Étape 9 — Suppression des colonnes redondantes (paires |r| > corr_threshold).
-               Exécutée EN DERNIER car les étapes 4 et 5 ont besoin des deux
-               colonnes d'une paire pour imputer et créer les features d'interaction.
-               On garde la colonne la plus corrélée à la cible (Diagnosis).
-    """
+               missing_threshold: float = MISSING_THRESHOLD,
+               corr_threshold: float = CORR_THRESHOLD) -> pd.DataFrame:
+    """Apply the full cleaning pipeline used before model training."""
     logger.info("Nettoyage : %d lignes, %d colonnes.", *df.shape)
     df_clean   = df.copy()
     target_col = "Diagnosis"
 
-    # ── Étape 1 ──────────────────────────────────────────────────────────────
-    cols_to_drop = [c for c in ["Management", "Severity"] if c in df_clean.columns]
+    # Step 1: remove leak-prone, circular or weak predictors.
+                                                            
+     
+                                                               
+                                
+     
+                                           
+                                                                     
+     
+                                                                          
+                                                                                   
+                                                         
+     
+                                                                        
+                                                                              
+                                    
+                                    
+                                                                        
+                                                                          
+                                                                                 
+                                                                                    
+                                                                                               
+    cols_to_drop = [c for c in TARGET_COLS + LEAKAGE_COLS + CIRCULAR_COLS + WEAK_COLS
+                    if c in df_clean.columns]
     if cols_to_drop:
         df_clean = df_clean.drop(columns=cols_to_drop)
-        logger.info("Étape 1 — Colonnes parasites : %s", cols_to_drop)
+        logger.info("Étape 1 — %d colonne(s) supprimées : %s", len(cols_to_drop), cols_to_drop)
 
-    # ── Étape 2 ──────────────────────────────────────────────────────────────
+    # Step 2: drop very sparse columns.
     feature_cols = [c for c in df_clean.columns if c != target_col]
     missing_rate = df_clean[feature_cols].isnull().mean()
     high_missing = missing_rate[missing_rate > missing_threshold].index.tolist()
@@ -420,21 +330,18 @@ def clean_data(df: pd.DataFrame,
     else:
         logger.info("Étape 2 — Aucune colonne > %.0f%% NaN.", missing_threshold * 100)
 
-    # Mémoriser le nombre de NaN par colonne AVANT imputation.
-    # Ce comptage sera utilisé à l'étape 9 pour départager les colonnes
-    # à supprimer : on préfère garder celles qui avaient le moins de NaN
-    # (leurs valeurs sont "plus réelles" que des valeurs imputées).
+    # Save NaN counts before imputation for later tie-breaks.
     original_nan_counts = df_clean.isnull().sum()
 
-    # ── Étape 3 ──────────────────────────────────────────────────────────────
+    # Step 3: reconstruct BMI.
     logger.info("Étape 3 — Reconstruction BMI...")
     df_clean = _impute_bmi(df_clean)
 
-    # ── Étape 4 ──────────────────────────────────────────────────────────────
+    # Step 4: correlation-based imputation.
     logger.info("Étape 4 — Imputation par corrélation (|r| ≥ %.2f)...", corr_threshold)
     df_clean = _impute_by_correlation(df_clean, corr_threshold, target_col)
 
-    # ── Étape 5 ──────────────────────────────────────────────────────────────
+    # Step 5: derived clinical features.
     if "WBC_Count" in df_clean.columns and "CRP" in df_clean.columns:
         df_clean["WBC_CRP_Ratio"] = df_clean["WBC_Count"] / (df_clean["CRP"] + 0.1)
         logger.info("Étape 5 — Feature 'WBC_CRP_Ratio' créée.")
@@ -445,7 +352,7 @@ def clean_data(df: pd.DataFrame,
         )
         logger.info("Étape 5 — Feature 'Neutrophil_WBC_Interaction' créée.")
 
-    # ── Étape 6 ──────────────────────────────────────────────────────────────
+    # Step 6: residual median/mode imputation.
     num_cols = [c for c in df_clean.select_dtypes(include=[np.number]).columns
                 if c != target_col]
     cat_cols = df_clean.select_dtypes(exclude=[np.number]).columns.tolist()
@@ -464,20 +371,20 @@ def clean_data(df: pd.DataFrame,
     if nan_num == 0 and nan_cat == 0:
         logger.info("Étape 6 — Aucun NaN résiduel.")
 
-    # ── Étape 7 ──────────────────────────────────────────────────────────────
+    # Step 7: remove duplicate rows.
     n_dupes = df_clean.duplicated().sum()
     if n_dupes > 0:
         df_clean = df_clean.drop_duplicates()
         logger.info("Étape 7 — %d doublon(s) supprimé(s).", n_dupes)
 
-    # ── Étape 8 ──────────────────────────────────────────────────────────────
+    # Step 8: clip outliers with IQR fences.
     numeric_features = [c for c in df_clean.select_dtypes(include=[np.number]).columns
                         if c != target_col]
     total_capped = 0
     for col in numeric_features:
         Q1, Q3 = df_clean[col].quantile(0.25), df_clean[col].quantile(0.75)
         IQR    = Q3 - Q1
-        lower, upper = Q1 - 1.5 * IQR, Q3 + 1.5 * IQR
+        lower, upper = Q1 - IQR_FACTOR * IQR, Q3 + IQR_FACTOR * IQR
         n_out  = ((df_clean[col] < lower) | (df_clean[col] > upper)).sum()
         if n_out > 0:
             df_clean[col]  = df_clean[col].clip(lower, upper)
@@ -485,10 +392,7 @@ def clean_data(df: pd.DataFrame,
     if total_capped > 0:
         logger.info("Étape 8 — %d valeurs cappées (IQR).", total_capped)
 
-    # ── Étape 9 : suppression des colonnes redondantes ───────────────────────
-    # On passe les NaN originaux (avant imputation) pour guider le choix :
-    # en cas d'égalité sur la corrélation avec la cible, on préfère garder
-    # la colonne qui avait le moins de NaN à l'origine.
+    # Step 9: prune redundant correlated features.
     logger.info("Étape 9 — Suppression colonnes redondantes (|r| ≥ %.2f)...", corr_threshold)
     df_clean, _ = _drop_correlated_features(
         df_clean,
@@ -501,31 +405,19 @@ def clean_data(df: pd.DataFrame,
     return df_clean
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# 5. PRÉTRAITEMENT ML
-# ─────────────────────────────────────────────────────────────────────────────
+                             
 
 def preprocess_data(
     df: pd.DataFrame,
-    target_col: str = "Diagnosis",
-    test_size: float = 0.2,
-    random_state: int = 42,
+    target_col: str = TARGET_COL,
+    test_size: float = TEST_SIZE,
+    random_state: int = RANDOM_STATE,
 ):
-    """
-    Prépare les données nettoyées pour l'entraînement ML.
-
-    Ordre des opérations (ne pas inverser — risque de data leakage) :
-      1. Encodage de la cible et one-hot des catégorielles
-      2. Split stratifié train/test  ← avant le scaling
-      3. Scaling (StandardScaler)    ← fit sur train uniquement
-
-    Returns:
-        X_train, X_test, y_train, y_test, scaler, feature_names
-    """
+    """Encode, split, and scale cleaned data for model training/evaluation."""
     logger.info("Prétraitement ML...")
     df_proc = df.copy()
 
-    # ── Encodage de la cible ─────────────────────────────────────────────────
+    # Encode target robustly even when it is categorical text.
     if df_proc[target_col].dtype.name == "category":
         df_proc[target_col] = df_proc[target_col].astype(str)
 
@@ -550,23 +442,24 @@ def preprocess_data(
     y = df_proc[target_col].astype(int)
     X = df_proc.drop(columns=[target_col])
 
-    # ── One-hot encoding ─────────────────────────────────────────────────────
+    # One-hot encode categorical predictors.
     cat_cols = X.select_dtypes(include=["object", "category"]).columns.tolist()
     if cat_cols:
         X = pd.get_dummies(X, columns=cat_cols, drop_first=True)
         logger.info("One-hot encoding : %s", cat_cols)
 
     feature_names = X.columns.tolist()
+    logger.info("Preprocess feature space | n_features=%d", len(feature_names))
 
-    # ── Split stratifié AVANT scaling (évite le data leakage) ────────────────
+    # Stratified split before scaling to avoid data leakage.
     X_train_raw, X_test_raw, y_train, y_test = train_test_split(
-        X.values, y,
+        X.values, y.values,
         test_size=test_size,
         random_state=random_state,
         stratify=y
     )
 
-    # ── Scaling : fit sur train uniquement, transform sur les deux ────────────
+    # Fit scaler on train only, then transform both splits.
     scaler  = StandardScaler()
     X_train = scaler.fit_transform(X_train_raw)
     X_test  = scaler.transform(X_test_raw)
@@ -576,14 +469,12 @@ def preprocess_data(
         len(X_train), len(X_test),
         y_train.mean() * 100, y_test.mean() * 100,
     )
+    logger.debug("Preprocess output shapes | X_train=%s | X_test=%s", X_train.shape, X_test.shape)
     return X_train, X_test, y_train, y_test, scaler, feature_names
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# UTILITAIRES
-# ─────────────────────────────────────────────────────────────────────────────
-
 def get_class_distribution(y: pd.Series) -> dict:
+    """Return class counts and percentages for quick diagnostics."""
     counts = y.value_counts()
     return {
         "counts":      counts.to_dict(),
@@ -591,9 +482,8 @@ def get_class_distribution(y: pd.Series) -> dict:
     }
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# TEST RAPIDE
-# ─────────────────────────────────────────────────────────────────────────────
+                     
+
 
 if __name__ == "__main__":
     df = load_data()

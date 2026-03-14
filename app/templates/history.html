@@ -1,117 +1,147 @@
+{#
+    history.html — Page d'historique des diagnostics
+    ==============================================
+    Affiche la liste des diagnostics passés sous forme de tableau.
+    Hérite de base.html.
+
+    Variables attendues :
+    - records : liste (id, patient_first_name, patient_last_name, timestamp, age, sex, prediction, confidence)
+#}
 {% extends "base.html" %}
-{% block title %}Diagnosis History — PediAppend{% endblock %}
+{% block title %}Historique &mdash; PediAppend{% endblock %}
 
 {% block content %}
 <section class="history-section">
-  <div class="section-header animate-in">
-    <div class="section-badge">
-      <i data-lucide="history" style="width:14px;height:14px"></i>
-      Records
-    </div>
-    <h2>Diagnosis History</h2>
-    <p>Review past diagnostic assessments and their outcomes.</p>
-  </div>
+    <div class="history-container">
 
-  {% if records %}
-  <!-- Filter Bar -->
-  <div class="filter-bar animate-in">
-    <div class="filter-bar-left">
-      <input type="text" class="filter-input" id="historySearch" placeholder="Search by age or sex...">
-      <select class="filter-select" id="historyFilter">
-        <option value="all">All Results</option>
-        <option value="1">Appendicitis</option>
-        <option value="0">No Appendicitis</option>
-      </select>
-    </div>
-    <div class="filter-bar-right">
-      <span class="record-count" id="recordCount">{{ total }} records</span>
-      <form action="{{ url_for('clear_history') }}" method="POST"
-            onsubmit="return confirm('Clear all history? This cannot be undone.')">
-        <button type="submit" class="btn-danger-sm">
-          <i data-lucide="trash-2" style="width:14px;height:14px"></i>
-          Clear All
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <!-- Table -->
-  <div class="history-table-wrap animate-in">
-    <table class="history-table" id="historyTable">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Date &amp; Time</th>
-          <th>Age</th>
-          <th>Sex</th>
-          <th>Result</th>
-          <th>Confidence</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for r in records %}
-        <tr data-id="{{ r.id }}" data-prediction="{{ r.prediction }}"
-            data-age="{{ r.age }}" data-sex="{{ r.sex }}">
-          <td>#{{ r.id }}</td>
-          <td>{{ r.timestamp }}</td>
-          <td>{{ r.age }} yrs</td>
-          <td style="text-transform:capitalize">{{ r.sex }}</td>
-          <td>
-            {% if r.prediction == 1 %}
-            <span class="pill pill-danger">
-              <i data-lucide="alert-triangle" style="width:12px;height:12px"></i>
-              Appendicitis
-            </span>
-            {% else %}
-            <span class="pill pill-safe">
-              <i data-lucide="check-circle" style="width:12px;height:12px"></i>
-              No Appendicitis
-            </span>
-            {% endif %}
-          </td>
-          <td>
-            <div style="display:flex;align-items:center;gap:.5rem">
-              <div class="confidence-bar-mini">
-                <div class="confidence-bar-fill {{ 'fill-danger' if r.prediction == 1 else 'fill-safe' }}"
-                     style="width:{{ (r.confidence * 100)|round|int }}%"></div>
-              </div>
-              <span class="confidence-pct">{{ "%.1f"|format(r.confidence * 100) }}%</span>
+        <!-- ═══ En-tête de la page ═══ -->
+        <!-- Titre, sous-titre, compteur de diagnostics et bouton de suppression globale -->
+        <div class="history-header animate-in">
+            <div>
+                <h1><span class="history-icon">&#128203;</span> Historique des diagnostics</h1>
+                <p class="history-subtitle">Consultez vos &eacute;valuations pass&eacute;es et les r&eacute;sultats patients</p>
             </div>
-          </td>
-          <td>
-            <button class="btn-icon" onclick="deleteRecord({{ r.id }}, this)" title="Delete record">
-              <i data-lucide="trash-2" style="width:14px;height:14px"></i>
-            </button>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
+            <!-- Actions de l'en-tête — affichées uniquement s'il y a des enregistrements -->
+            {% if records|length > 0 %}
+            <div class="history-header-actions">
+                <!-- Compteur du nombre total de diagnostics -->
+                <span class="record-count">{{ records|length }} diagnostic{{ 's' if records|length > 1 else '' }}</span>
+                <!-- Bouton pour effacer tout l'historique (appelle clearHistory() en JS) -->
+                <button type="button" class="btn-clear" data-action="clear-history">
+                    &#128465; Tout effacer
+                </button>
+            </div>
+            {% endif %}
+        </div>
 
-  <!-- Pagination -->
-  {% if total_pages > 1 %}
-  <div class="pagination animate-in">
-    {% for p in range(1, total_pages + 1) %}
-    <a href="{{ url_for('history', page=p) }}" class="page-link {{ 'active' if p == page else '' }}">{{ p }}</a>
-    {% endfor %}
-  </div>
-  {% endif %}
+        <!-- ═══ Barre de filtres — Recherche et filtrage des résultats ═══ -->
+        <!-- Visible uniquement s'il y a des enregistrements -->
+        {% if records|length > 0 %}
+        <div class="filter-bar animate-in">
+            <!-- Champ de recherche textuelle (filtre en temps réel via JS) -->
+            <div class="filter-bar-left">
+                <span class="filter-icon">&#128269;</span>
+                <input type="text" id="searchInput" class="filter-input" placeholder="Rechercher un patient, une date&hellip;">
+            </div>
+            <!-- Menu déroulant pour filtrer par type de résultat (tous / positif / négatif) -->
+            <div class="filter-bar-right">
+                <select id="filterResult" class="filter-select">
+                    <option value="all">Tous les r&eacute;sultats</option>
+                    <option value="positive">&#9888; Positif</option>
+                    <option value="negative">&#10003; N&eacute;gatif</option>
+                </select>
+            </div>
+        </div>
+        {% endif %}
 
-  {% else %}
-  <!-- Empty State -->
-  <div class="empty-state animate-in">
-    <div class="empty-icon">
-      <i data-lucide="clipboard-x" style="width:48px;height:48px;color:var(--slate-300)"></i>
+        <!-- ═══ État vide — Affiché lorsqu'il n'y a aucun diagnostic enregistré ═══ -->
+        {% if records|length == 0 %}
+        <div class="empty-state animate-in">
+            <div class="empty-icon">&#128203;</div>
+            <h3>Aucun diagnostic enregistr&eacute;</h3>
+            <p>Les diagnostics effectu&eacute;s appara&icirc;tront ici pour r&eacute;f&eacute;rence.</p>
+            <!-- Bouton CTA pour lancer un premier diagnostic -->
+            <a href="{{ url_for('diagnosis') }}" class="btn btn-primary btn-lg">&#129657; Lancer un diagnostic</a>
+        </div>
+
+        <!-- ═══ Tableau des diagnostics ═══ -->
+        {% else %}
+        <p class="filter-empty" id="filterEmpty" hidden>Aucun r&eacute;sultat ne correspond &agrave; ce filtre.</p>
+        <div class="history-table-wrap animate-in">
+            <table class="history-table" id="historyTable">
+                <!-- En-tête du tableau : colonnes #, Patient, Date, Âge, Sexe, Résultat, Confiance, Actions -->
+                <thead>
+                    <tr>
+                        <th class="th-num">#</th>
+                        <th>Patient</th>
+                        <th>Date</th>
+                        <th>&#194;ge</th>
+                        <th>Sexe</th>
+                        <th>R&eacute;sultat</th>
+                        <th>Confiance</th>
+                        <th class="th-actions">Actions</th>
+                    </tr>
+                </thead>
+                <!-- Corps du tableau — une ligne par diagnostic enregistré -->
+                <tbody>
+                    {% for r in records %}
+                    <!-- Chaque ligne porte un attribut data-result pour le filtrage JS -->
+                    <tr data-result="{{ 'positive' if r.prediction == 1 else 'negative' }}">
+                        <!-- Numéro de ligne -->
+                        <td class="cell-num">{{ loop.index }}</td>
+                        <!-- Nom du patient (ou tiret si anonyme) -->
+                        <td class="cell-patient">
+                            {% if r.patient_first_name or r.patient_last_name %}
+                            <span class="patient-name">{{ r.patient_first_name }} {{ r.patient_last_name }}</span>
+                            {% else %}
+                            <span class="patient-anon">&mdash;</span>
+                            {% endif %}
+                        </td>
+                        <!-- Date du diagnostic (tronquée aux 16 premiers caractères : YYYY-MM-DD HH:MM) -->
+                        <td class="cell-date">{{ r.timestamp[:16] }}</td>
+                        <!-- Âge du patient en années -->
+                        <td class="cell-age">{{ r.age }} ans</td>
+                        <!-- Sexe avec badge coloré (bleu = masculin, rose = féminin) -->
+                        <td>
+                            <span class="sex-pill {{ 'male' if r.sex == 'male' else 'female' }}">
+                                {{ 'Masculin' if r.sex == 'male' else 'F&eacute;minin' }}
+                            </span>
+                        </td>
+                        <!-- Résultat : badge positif (warning) ou négatif (ok) -->
+                        <td>
+                            {% if r.prediction == 1 %}
+                            <span class="result-pill positive">&#9888; Positif</span>
+                            {% else %}
+                            <span class="result-pill negative">&#10003; N&eacute;gatif</span>
+                            {% endif %}
+                        </td>
+                        <!-- Confiance du modèle avec mini barre de progression -->
+                        <td>
+                            <div class="confidence-cell">
+                                <div class="confidence-bar-mini">
+                                    <!-- Barre colorée : rouge si positif, verte si négatif -->
+                                    <div class="confidence-bar-fill {{ 'fill-danger' if r.prediction == 1 else 'fill-safe' }}" style="width:{{ (r.confidence * 100)|round(1) }}%"></div>
+                                </div>
+                                <span class="confidence-pct">{{ (r.confidence * 100)|round(1) }}%</span>
+                            </div>
+                        </td>
+                        <!-- Bouton de suppression individuelle (appelle deleteRecord() en JS) -->
+                        <td class="cell-actions">
+                            <button type="button" class="btn-icon" data-action="delete-record" data-record-id="{{ r.id }}" title="Supprimer">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
     </div>
-    <h3>No Records Yet</h3>
-    <p>Diagnosis history will appear here after your first patient assessment.</p>
-    <a href="{{ url_for('index') }}#diagnosis" class="btn btn-primary">
-      <i data-lucide="plus" style="width:16px;height:16px"></i>
-      Start First Diagnosis
-    </a>
-  </div>
-  {% endif %}
 </section>
+{% endblock %}
+
+<!-- Chargement du script spécifique à la page d'historique (suppression, filtrage) -->
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/history.js') }}"></script>
 {% endblock %}
