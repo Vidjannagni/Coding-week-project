@@ -23,6 +23,14 @@ def get_db():
     return conn
 
 
+def _row_to_record(row) -> dict:
+    """Convert a SQLite Row to a plain dict, normalising nullable name fields."""
+    record = dict(row)
+    record["patient_first_name"] = record.get("patient_first_name") or ""
+    record["patient_last_name"]  = record.get("patient_last_name") or ""
+    return record
+
+
 class User(UserMixin):
     def __init__(self, id, username, password_hash, is_admin=False):
         self.id = id
@@ -212,7 +220,7 @@ def history():
     rows = conn.execute("SELECT * FROM history WHERE user_id = ? ORDER BY id DESC",
                         (current_user.id,)).fetchall()
     conn.close()
-    records = [{**dict(r), "patient_first_name": r["patient_first_name"] or "", "patient_last_name": r["patient_last_name"] or ""} for r in rows]
+    records = [_row_to_record(r) for r in rows]
     logger.info("History fetched | user_id=%s | records=%d", current_user.id, len(records))
     return render_template("history.html", records=records)
 
