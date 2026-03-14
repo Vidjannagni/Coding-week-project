@@ -49,3 +49,19 @@ def metrics_data():
     """Load metrics.json once per session."""
     with open(os.path.join(MODELS_DIR, "metrics.json")) as f:
         return json.load(f)
+
+
+@pytest.fixture(scope="session")
+def y_pred_test(preprocessed, loaded_model):
+    """Prédictions binaires du meilleur modèle sur le jeu de test."""
+    _, X_test, _, _, _, _ = preprocessed
+    model, _, _ = loaded_model
+    return model.predict(X_test)
+
+
+@pytest.fixture(scope="session")
+def y_prob_test(preprocessed, loaded_model):
+    """Probabilités de classe positive du meilleur modèle sur le jeu de test."""
+    _, X_test, _, _, _, _ = preprocessed
+    model, _, _ = loaded_model
+    return model.predict_proba(X_test)[:, 1]
