@@ -286,7 +286,7 @@ def clean_data(df: pd.DataFrame,
     """Apply the full cleaning pipeline used before model training."""
     logger.info("Nettoyage : %d lignes, %d colonnes.", *df.shape)
     df_clean   = df.copy()
-    target_col = "Diagnosis"
+    target_col = TARGET_COL
 
     # Step 1: remove leak-prone, circular or weak predictors.
                                                             
