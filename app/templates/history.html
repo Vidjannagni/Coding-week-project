@@ -27,7 +27,7 @@
                 <!-- Compteur du nombre total de diagnostics -->
                 <span class="record-count">{{ records|length }} diagnostic{{ 's' if records|length > 1 else '' }}</span>
                 <!-- Bouton pour effacer tout l'historique (appelle clearHistory() en JS) -->
-                <button type="button" class="btn-clear" onclick="clearHistory()">
+                <button type="button" class="btn-clear" data-action="clear-history">
                     &#128465; Tout effacer
                 </button>
             </div>
@@ -41,11 +41,11 @@
             <!-- Champ de recherche textuelle (filtre en temps réel via JS) -->
             <div class="filter-bar-left">
                 <span class="filter-icon">&#128269;</span>
-                <input type="text" id="searchInput" class="filter-input" placeholder="Rechercher un patient, une date&hellip;" oninput="filterRecords()">
+                <input type="text" id="searchInput" class="filter-input" placeholder="Rechercher un patient, une date&hellip;">
             </div>
             <!-- Menu déroulant pour filtrer par type de résultat (tous / positif / négatif) -->
             <div class="filter-bar-right">
-                <select id="filterResult" class="filter-select" onchange="filterRecords()">
+                <select id="filterResult" class="filter-select">
                     <option value="all">Tous les r&eacute;sultats</option>
                     <option value="positive">&#9888; Positif</option>
                     <option value="negative">&#10003; N&eacute;gatif</option>
@@ -127,7 +127,7 @@
                         </td>
                         <!-- Bouton de suppression individuelle (appelle deleteRecord() en JS) -->
                         <td class="cell-actions">
-                            <button type="button" class="btn-icon" onclick="deleteRecord({{ r.id }})" title="Supprimer">
+                            <button type="button" class="btn-icon" data-action="delete-record" data-record-id="{{ r.id }}" title="Supprimer">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
                             </button>
                         </td>

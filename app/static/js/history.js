@@ -6,24 +6,9 @@
    ═══════════════════════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
 
-    /* ═══ SUPPRESSION D'UN ENREGISTREMENT ═══ */
-    /* Fonction globale car appelée via onclick dans le HTML */
-    window.deleteRecord = function(id) {
-        if (!confirm('Supprimer cet enregistrement ?')) return;
-        fetch('/history/' + encodeURIComponent(id), { method: 'DELETE' })
-            .then(r => { if (r.ok) location.reload(); });
-    };
-
-    /* ═══ EFFACEMENT COMPLET DE L'HISTORIQUE ═══ */
-    window.clearHistory = function() {
-        if (!confirm('Effacer tout l\'historique ? Cette action est irréversible.')) return;
-        fetch('/history/clear', { method: 'POST' })
-            .then(r => { if (r.ok) location.reload(); });
-    };
-
     /* ═══ FILTRAGE CÔTÉ CLIENT ═══ */
     /* Filtre les lignes du tableau par texte de recherche et type de résultat */
-    window.filterRecords = function() {
+    function filterRecords() {
         const q = (document.getElementById('searchInput')?.value || '').toLowerCase();
         const f = document.getElementById('filterResult')?.value || 'all';
         let anyVisible = false;
@@ -38,9 +23,38 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         const empty = document.getElementById('filterEmpty');
         if (empty) empty.hidden = anyVisible;
-    };
+    }
+
+    const table = document.getElementById('historyTable');
+    if (table) {
+        table.addEventListener('click', (e) => {
+            const btn = e.target.closest('button[data-action]');
+            if (!btn) return;
+            const action = btn.dataset.action;
+            if (action !== 'delete-record') return;
+            const id = btn.dataset.recordId;
+            if (!id) return;
+            if (!confirm('Supprimer cet enregistrement ?')) return;
+            fetch('/history/' + encodeURIComponent(id), { method: 'DELETE' })
+                .then(r => { if (r.ok) location.reload(); });
+        });
+    }
+
+    const clearBtn = document.querySelector('button[data-action="clear-history"]');
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+            if (!confirm('Effacer tout l\'historique ? Cette action est irréversible.')) return;
+            fetch('/history/clear', { method: 'POST' })
+                .then(r => { if (r.ok) location.reload(); });
+        });
+    }
+
+    const search = document.getElementById('searchInput');
+    const select = document.getElementById('filterResult');
+    if (search) search.addEventListener('input', filterRecords);
+    if (select) select.addEventListener('change', filterRecords);
 
     // Initialize empty-state for filters on first render.
-    if (document.getElementById('historyTable')) window.filterRecords();
+    if (document.getElementById('historyTable')) filterRecords();
 
 });
