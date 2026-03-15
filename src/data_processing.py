@@ -218,11 +218,17 @@ def _drop_correlated_features(df: pd.DataFrame,
             lambda v: 0 if "no" in v else (1 if "appendicitis" in v else np.nan)
         )
 
-    # Compute correlation with target without mutating the original dataframe.
+    # Compute target correlations using corrwith to avoid embedding a
+    # FloatingArray (pandas 2.3 extension type) into df_for_corr, which
+    # would cause "underlying array is read-only" when corr() calls
+    # to_numpy(copy=False) on numpy 2.x.
     df_for_corr = df[num_cols].copy()
-    df_for_corr[target_col] = pd.to_numeric(target_numeric, errors="coerce")
+    numeric_target = np.array(pd.to_numeric(target_numeric, errors="coerce"),
+                              dtype=np.float64)
     # Greedy loop: drop one redundant column at a time.
-    target_corr = df_for_corr.corr()[target_col].abs().drop(target_col)
+    target_corr = df_for_corr.corrwith(
+        pd.Series(numeric_target, index=df_for_corr.index)
+    ).abs()
 
     dropped = []
 
@@ -233,7 +239,7 @@ def _drop_correlated_features(df: pd.DataFrame,
         if len(remaining) < 2:
             break
 
-        corr_matrix = df[remaining].corr().abs()
+        corr_matrix = df[remaining].copy().corr().abs()
 
                                             # Redundancy score = number of columns above threshold.
         np.fill_diagonal(corr_matrix.values, 0)
