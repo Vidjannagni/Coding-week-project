@@ -37,6 +37,9 @@ def _normalise_shap(sv) -> np.ndarray:
     """Return SHAP values for the positive class from any SHAP output format."""
     if isinstance(sv, list):
         return sv[1]
+    sv = np.asarray(sv)
+    if sv.ndim == 3:
+        return sv[:, :, 1]
     return sv
 
 
@@ -146,7 +149,9 @@ def generate_shap_plots(model, X_test, feature_names: list, save_dir: str = IMAG
 
     # Summary bar plot.
     plt.figure(figsize=PLOT_FIGSIZE_WIDE)
-    shap.summary_plot(shap_values, X_df, plot_type="bar", show=False, max_display=SHAP_MAX_DISPLAY)
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=FutureWarning, message=".*NumPy global RNG.*")
+        shap.summary_plot(shap_values, X_df, plot_type="bar", show=False, max_display=SHAP_MAX_DISPLAY)
     plt.title("SHAP Feature Importance (Top 15)", fontsize=14, fontweight="bold")
     plt.tight_layout()
     plt.savefig(os.path.join(save_dir, "shap_summary_bar.png"), dpi=PLOT_DPI, bbox_inches="tight")
@@ -155,7 +160,9 @@ def generate_shap_plots(model, X_test, feature_names: list, save_dir: str = IMAG
 
     # Beeswarm plot.
     plt.figure(figsize=PLOT_FIGSIZE_WIDE)
-    shap.summary_plot(shap_values, X_df, show=False, max_display=SHAP_MAX_DISPLAY)
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=FutureWarning, message=".*NumPy global RNG.*")
+        shap.summary_plot(shap_values, X_df, show=False, max_display=SHAP_MAX_DISPLAY)
     plt.title("SHAP Beeswarm Plot (Top 15)", fontsize=14, fontweight="bold")
     plt.tight_layout()
     plt.savefig(os.path.join(save_dir, "shap_beeswarm.png"), dpi=PLOT_DPI, bbox_inches="tight")
@@ -166,7 +173,7 @@ def generate_shap_plots(model, X_test, feature_names: list, save_dir: str = IMAG
     try:
         explanation = shap.Explanation(
             values=shap_values[0],
-            base_values=explainer.expected_value if not isinstance(explainer.expected_value, np.ndarray) else explainer.expected_value[1],
+            base_values=_scalar_base_value(explainer.expected_value),
             data=X_test[0],
             feature_names=feature_names,
         )

@@ -3,6 +3,7 @@
 import os
 import sys
 import json
+import warnings
 
 import pytest
 import joblib
@@ -12,6 +13,25 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from src.data_processing import load_data, optimize_memory, clean_data, preprocess_data
 
 MODELS_DIR = os.path.join(os.path.dirname(__file__), "..", "models")
+
+
+def pytest_configure(config):
+    """Suppress known third-party warnings that are not actionable."""
+    warnings.filterwarnings(
+        "ignore",
+        category=FutureWarning,
+        message=".*NumPy global RNG.*",
+    )
+    warnings.filterwarnings(
+        "ignore",
+        category=UserWarning,
+        message=".*does not have valid feature names.*",
+    )
+    warnings.filterwarnings(
+        "ignore",
+        category=UserWarning,
+        message=".*has feature names, but .* was fitted without feature names.*",
+    )
 
 
 @pytest.fixture(scope="session")

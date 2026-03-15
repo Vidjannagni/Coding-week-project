@@ -5,8 +5,11 @@ import sys
 import json
 import tempfile
 
+import warnings
+
 import pytest
 import numpy as np
+import pandas as pd
 import joblib
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
@@ -113,7 +116,7 @@ class TestSavedModel:
     def test_prediction_valid(self, loaded_model):
         model, scaler, feature_names = loaded_model
         dummy = np.zeros((1, len(feature_names)))
-        X = scaler.transform(dummy)
+        X = pd.DataFrame(scaler.transform(dummy), columns=feature_names)
         pred = model.predict(X)
         proba = model.predict_proba(X)
         assert pred[0] in [0, 1]
@@ -123,7 +126,7 @@ class TestSavedModel:
     def test_probabilities_in_range(self, loaded_model):
         model, scaler, feature_names = loaded_model
         dummy = np.zeros((1, len(feature_names)))
-        X = scaler.transform(dummy)
+        X = pd.DataFrame(scaler.transform(dummy), columns=feature_names)
         proba = model.predict_proba(X)
         assert 0 <= proba[0][0] <= 1
         assert 0 <= proba[0][1] <= 1
@@ -172,7 +175,7 @@ class TestSavedModel:
     def test_batch_prediction(self, loaded_model):
         model, scaler, feature_names = loaded_model
         batch = np.random.randn(10, len(feature_names))
-        X = scaler.transform(batch)
+        X = pd.DataFrame(scaler.transform(batch), columns=feature_names)
         preds = model.predict(X)
         probas = model.predict_proba(X)
         assert preds.shape == (10,)
