@@ -240,9 +240,13 @@ def _drop_correlated_features(df: pd.DataFrame,
             break
 
         corr_matrix = df[remaining].copy().corr().abs()
-
-                                            # Redundancy score = number of columns above threshold.
-        np.fill_diagonal(corr_matrix.values, 0)
+        # Rebuild from a writable numpy copy — pandas 2.3 CoW makes
+        # .values read-only, which breaks np.fill_diagonal in-place.
+        corr_values = corr_matrix.to_numpy(dtype=float, copy=True)
+        np.fill_diagonal(corr_values, 0)
+        corr_matrix = pd.DataFrame(corr_values,
+                                   index=corr_matrix.index,
+                                   columns=corr_matrix.columns)
         redundancy_score = (corr_matrix >= corr_threshold).sum()
 
         if redundancy_score.max() == 0:
