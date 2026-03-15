@@ -5,7 +5,7 @@
 [![CI Pipeline](https://github.com/Mavens06/Coding-week-project/actions/workflows/ci.yml/badge.svg)](https://github.com/Mavens06/Coding-week-project/actions)
 ![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)
-![Version](https://img.shields.io/badge/version-1.1.2-orange.svg)
+![Version](https://img.shields.io/badge/version-1.2.4-orange.svg)
 
 ---
 
@@ -315,10 +315,17 @@ Coding-week-project/
 |   |-- shap_utils.py                    # SHAP explainer init + per-prediction SHAP value computation
 |   |-- history.db                       # SQLite database (users + prediction history)
 |   |-- static/
-|   |   |-- css/style.css                # Global UI styles (landing, form, results, admin)
+|   |   |-- css/
+|   |   |   |-- core.css                # Base layout, typography, utilities
+|   |   |   |-- form.css               # Diagnosis form wizard styles
+|   |   |   |-- landing.css            # Landing page hero and sections
+|   |   |   |-- pages.css              # Login, register, history, admin, profile
+|   |   |   |-- result.css             # Prediction result page
+|   |   |   `-- style.css              # Global imports and shared variables
 |   |   |-- img/
 |   |   |   |-- anatomy-body.jpg
-|   |   |   `-- appendix-anatomy.svg
+|   |   |   |-- appendix-anatomy.svg
+|   |   |   `-- favicon.svg
 |   |   `-- js/
 |   |       |-- common.js                # Global UI (navbar, animations, flash)
 |   |       |-- landing.js               # Landing page slides + stats + particles
@@ -376,7 +383,7 @@ Coding-week-project/
 |       `-- shap_beeswarm.png
 |
 |-- src/                                 # ML pipeline source code
-|   |-- __init__.py                      # Package version: "1.1.2"
+|   |-- __init__.py                      # Package version: "1.2.4"
 |   |-- config.py                        # Central config: paths, ML defaults, cleaning thresholds
 |   |-- data_processing.py               # load, optimize, clean (9 steps), preprocess
 |   |-- train_model.py                   # Train 4 models, CV, select best, save artifacts
@@ -575,8 +582,7 @@ The Flask web application provides a clinical-grade interface:
 
 - Global JS: `app/static/js/common.js` (navbar scroll state, smooth scroll, entry animations, flash auto-dismiss)
 - Per-page JS: `landing.js`, `diagnosis.js`, `result.js`, `history.js`, `admin.js`
-- CSS: `app/static/css/style.css`
-- Template note: prefer Jinja comments `{# ... #}` for file headers / internal docs in templates (HTML comments can still be used for rendered markup, but avoid embedding Jinja tags inside them).
+- CSS (in `app/static/css/`): `style.css` (global imports), `core.css` (base layout), `landing.css`, `form.css`, `result.css`, `pages.css`
 
 ### Pages
 
